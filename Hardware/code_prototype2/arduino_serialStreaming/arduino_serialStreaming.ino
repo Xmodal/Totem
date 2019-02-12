@@ -1,6 +1,6 @@
 #include <FastLED.h>
 
-#define COLS 396 // 36 leds * 11 boxes
+#define COLS 360 // 36 leds * 11 boxes
 #define ROWS 9
 #define NUM_LEDS 396 // 36 leds * 11 boxes, number of leds per output (9 per pcb)
 #define RATE 3 // 3 seems like the ideal value, slowdown if glitches appear at the end of the strips but watchout for dropping FPS
@@ -42,9 +42,9 @@ void loop() {
     {
       int value = incomingByte;
       if (indexcount < ROWS * COLS)//check if counter hasn't glitched
-      {
-        int x = floor(float(indexcount) / COLS);//get strip output index [0 -> 9] from counter
-        int y = indexcount % COLS;//get led index in strip [0 -> 396] from counter
+      { 
+        int x = indexcount % COLS;//get led index in strip [0 -> 396] from counter
+        int y = floor(float(indexcount) / COLS);//get strip output index [0 -> 9] from counter
         //set led values
         leds[x][y].red = value;
         leds[x][y].green = value;
