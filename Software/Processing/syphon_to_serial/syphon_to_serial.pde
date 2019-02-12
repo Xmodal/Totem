@@ -34,7 +34,7 @@ void draw()
     {
       for(int j = 0; j < height; j++)
       {
-        myPort.write(get(i, j) > 254 ? 254 : get(i, j));
+        myPort.write((get(i, j) > 254) ? 254 : get(i, j));
       }
     }    
   }  

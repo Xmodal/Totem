@@ -1,8 +1,8 @@
 #include <FastLED.h>
 
-#define COLS 360 // 36 leds * 11 boxes
+#define COLS 360 // 36 leds * 10 boxes
 #define ROWS 9
-#define NUM_LEDS 360 // 36 leds * 11 boxes, number of leds per output (9 per pcb)
+#define NUM_LEDS 360 // 36 leds * 10 boxes, number of leds per output (9 per pcb)
 #define RATE 3 // 3 seems like the ideal value, slowdown if glitches appear at the end of the strips but watchout for dropping FPS
 
 //set teensy at 144 mhz
