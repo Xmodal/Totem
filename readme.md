@@ -3,7 +3,7 @@ Totem
 
 Github for the totem project
 
-#Folders
+# Folders
 
 * **Code** : working folder, one folder by language. 
 * **Hardware** : PCB files, gerbers, BOM… coming from Lucas.
