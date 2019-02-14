@@ -12,3 +12,6 @@ Github for the totem project
 # OSC
 
 Lightboard - Port: 12000 - message: `/led int[0..255]`
+
+Data : float between 0 & 1
+
