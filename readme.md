@@ -66,3 +66,10 @@ void oscEvent(OscMessage theOscMessage) {
   /* send the message */
   oscP5.send(myMessage, myRemoteLocation); 
   ```
+# Touchdesigner
+
+Disable auto backup (to avoid cluttering the git) : ```Preference -> increment filename on save -> off```
+
+# Syphon
+
+**Processing** : To stop a program do not click the "stop" button but the close the display window
