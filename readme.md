@@ -17,8 +17,7 @@ Data : float between 0 & 1
 
 ### Example for receiving OSC with Processing
 
-`
-//import librarys for OSC
+`//import librarys for OSC
 import oscP5.*;
 import netP5.*;
 
@@ -51,16 +50,15 @@ void oscEvent(OscMessage theOscMessage) {
   if (theOscMessage.checkAddrPattern("/led") == true) {
     brightness = theOscMessage.get(0).intValue();
   }
-}
-`
+}`
 
 ### Example for sending OSC with Processing
 
-`
-  /* in the following different ways of creating osc messages are shown by example */
+`/* in the following different ways of creating osc messages are shown by example */
   OscMessage myMessage = new OscMessage("/test");
   
   myMessage.add(123); /* add an int to the osc message */
 
   /* send the message */
   oscP5.send(myMessage, myRemoteLocation); 
+`
