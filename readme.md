@@ -11,9 +11,10 @@ Github for the totem project
 
 # OSC
 
-Lightboard - Port: 12000 - message: ```/led int[0..255]```
+Data : floats normalized between ```0 & 1``` or ```-1 & 1```
+message : in the form of ```/addr param1 param1 ...```
 
-Data : float between 0 & 1
+lightboard: port-12000 - message: ```/led float[0..1]```
 
 ### Example for receiving OSC with Processing
 
