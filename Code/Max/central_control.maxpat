@@ -80,7 +80,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "signal" ],
-					"patching_rect" : [ 343.0, 57.0, 74.0, 22.0 ],
+					"patching_rect" : [ 163.5, 79.0, 74.0, 22.0 ],
 					"style" : "",
 					"text" : "phasor~ 0.1"
 				}
@@ -93,7 +93,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "float" ],
-					"patching_rect" : [ 111.0, 117.0, 42.0, 22.0 ],
+					"patching_rect" : [ 111.0, 177.0, 42.0, 22.0 ],
 					"style" : "",
 					"text" : "* 255."
 				}
@@ -106,7 +106,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "float" ],
-					"patching_rect" : [ 111.0, 60.0, 84.0, 22.0 ],
+					"patching_rect" : [ 111.0, 120.0, 84.0, 22.0 ],
 					"style" : "",
 					"text" : "peakamp~ 10"
 				}
@@ -121,7 +121,7 @@
 					"numoutlets" : 2,
 					"outlettype" : [ "", "bang" ],
 					"parameter_enable" : 0,
-					"patching_rect" : [ 111.0, 88.0, 50.0, 22.0 ],
+					"patching_rect" : [ 111.0, 148.0, 50.0, 22.0 ],
 					"style" : ""
 				}
 
@@ -133,7 +133,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 2,
 					"outlettype" : [ "signal", "signal" ],
-					"patching_rect" : [ 111.0, 34.0, 37.0, 22.0 ],
+					"patching_rect" : [ 111.0, 79.0, 37.0, 22.0 ],
 					"style" : "",
 					"text" : "adc~"
 				}
@@ -159,7 +159,7 @@
 					"numoutlets" : 2,
 					"outlettype" : [ "", "bang" ],
 					"parameter_enable" : 0,
-					"patching_rect" : [ 111.0, 155.0, 50.0, 22.0 ],
+					"patching_rect" : [ 111.0, 215.0, 50.0, 22.0 ],
 					"style" : ""
 				}
 
@@ -171,7 +171,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 111.0, 187.0, 47.0, 22.0 ],
+					"patching_rect" : [ 111.0, 247.0, 47.0, 22.0 ],
 					"style" : "",
 					"text" : "/led $1"
 				}
