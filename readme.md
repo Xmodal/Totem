@@ -9,4 +9,4 @@ Github for the totem project
 * **Hardware** : PCB files, gerbers, BOM… coming from Lucas.
 * **Stuff** : for dumping potential codes, examples, snippets… working or not.
 
- 
+
