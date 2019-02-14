@@ -15,9 +15,9 @@ Lightboard - Port: 12000 - message: `/led int[0..255]`
 
 Data : float between 0 & 1
 
-<h3>Example for receiving OSC with Processing</h3>
+### Example for receiving OSC with Processing
 
-
+`
 //import librarys for OSC
 import oscP5.*;
 import netP5.*;
@@ -52,10 +52,11 @@ void oscEvent(OscMessage theOscMessage) {
     brightness = theOscMessage.get(0).intValue();
   }
 }
+`
 
+### Example for sending OSC with Processing
 
-<h3>Example for sending OSC with Processing</h3>
-
+`
   /* in the following different ways of creating osc messages are shown by example */
   OscMessage myMessage = new OscMessage("/test");
   
