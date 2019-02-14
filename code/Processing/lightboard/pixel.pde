@@ -12,4 +12,9 @@ class Pixel {
     fill((int)brightNess);
     rect(xPos, yPos, size, size); 
    }
+   
+   void display(){
+    fill(0);
+    rect(xPos, yPos, size, size); 
+   }
 }
