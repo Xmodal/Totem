@@ -14,7 +14,8 @@ Github for the totem project
 Data : floats normalized between ```0 & 1``` or ```-1 & 1```
 message : in the form of ```/addr param1 param1 ...```
 
-lightboard: port-12000 - message: ```/led float[0..1]```
+**lightboard** : port-12000 - message: ```/led float[0..1]```
+**optical_flow_with_osc** : send: ```/aveFlow x[-1..1] y[-1..1]
 
 ### Example for receiving OSC with Processing
 
