@@ -5,7 +5,6 @@ import oscP5.*;
 import netP5.*;
   
 OscP5 oscP5;
-NetAddress myRemoteLocation;
 NetAddress recipient;
 
 OpenCV opencv;
@@ -14,10 +13,8 @@ Capture video;
 void setup() {
   size(320, 240);
   
-  oscP5 = new OscP5(this,12000);
-  myRemoteLocation = new NetAddress("127.0.0.1",12000);
-  
-  recipient = new NetAddress("127.0.0.1",12000);
+  oscP5 = new OscP5(this,12000);  
+  recipient = new NetAddress("127.0.0.1",12001);
   
   video = new Capture(this, 640/2, 480/2, 15);
   opencv = new OpenCV(this, 640/2, 480/2);
@@ -43,10 +40,9 @@ void draw() {
   strokeWeight(2);
   line(video.width/2, video.height/2, video.width/2 + aveFlow.x*flowScale, video.height/2 + aveFlow.y*flowScale);
   
-  OscMessage aveFlowMessage = new OscMessage("/aveFlow/");
-  
-  aveFlowMessage.add(aveFlow.x + "/" + aveFlow.y);                          //message looks like: "/aveFlow/[x value]/[y value]"
-  
+  OscMessage aveFlowMessage = new OscMessage("/aveFlow");
+  aveFlowMessage.add(aveFlow.x);                          //message looks like: "/aveFlow/[x value]/[y value]"
+  aveFlowMessage.add(aveFlow.y);
   oscP5.send(aveFlowMessage, recipient);
   
   aveFlowMessage.print();
