@@ -3,6 +3,11 @@ Totem
 
 Github for the totem project
 
+# Working pipe
+
+* openFrameworks (video generation) => syphon => touch designer (conversion video to serial) => serial => teensy => LED
+* LED array : 9 x 360 
+
 # Folders
 
 * **Code** : working folder, one folder by language. 
@@ -15,6 +20,44 @@ Github for the totem project
 Install the OF folder “of_v0.10.1_osx_release” in ```Totem/Code/openFrameworks/of_v0.10.1_osx_release```
 “of_v0.10.1_osx_release” is included in the .gitignore .
 
+
+
+# Touchdesigner
+
+Disable auto backup (to avoid cluttering the git) : ```Preference -> increment filename on save -> off```
+
+# Syphon
+
+
+Issue with Touch Designer not reconnecting with syphon:
+* **Processing** : To stop a program do not click the "stop" button but the close the display window
+* **openFrameworks** : To stop a program close the display window
+
+**Open Frameworks**
+
+Need ofxSyphon
+
+In ofApp.h
+```
+#include "ofxSyphon.h"
+
+public:
+	ofxSyphonServer mainOutputSyphonServer;
+	ofxSyphonClient mClient;
+```
+
+In ofApp.cpp
+```
+void ofApp::setup(){
+	mainOutputSyphonServer.setName("OF_syphon");
+	mClient.setup();
+}
+
+void ofApp::draw(){
+	mClient.draw(9,360);
+	mainOutputSyphonServer.publishScreen();
+}
+```
 
 # OSC
 
@@ -74,40 +117,3 @@ void oscEvent(OscMessage theOscMessage) {
   /* send the message */
   oscP5.send(myMessage, myRemoteLocation); 
   ```
-# Touchdesigner
-
-Disable auto backup (to avoid cluttering the git) : ```Preference -> increment filename on save -> off```
-
-# Syphon
-
-
-Issue with Touch Designer not reconnecting with syphon:
-**Processing** : To stop a program do not click the "stop" button but the close the display window
-**openFrameworks** : To stop a program close the display window
-
-**Open Frameworks**
-
-Need ofxSyphon
-
-In ofApp.h
-```
-#include "ofxSyphon.h"
-
-public:
-	ofxSyphonServer mainOutputSyphonServer;
-	ofxSyphonClient mClient;
-```
-
-In ofApp.cpp
-```
-void ofApp::setup(){
-	mainOutputSyphonServer.setName("OF_syphon");
-	mClient.setup();
-}
-
-void ofApp::draw(){
-	mClient.draw(9,360);
-	mainOutputSyphonServer.publishScreen();
-}
-```
-
