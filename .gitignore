@@ -1,3 +1,6 @@
+# ignore open frameworks
+Code/openFrameworks/of_v0.10.1_osx_release/*
+
 
 # Created by https://www.gitignore.io/api/c++,video,python,openframeworks
 # Edit at https://www.gitignore.io/?templates=c++,video,python,openframeworks
