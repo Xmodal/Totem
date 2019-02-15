@@ -9,13 +9,6 @@ Github for the totem project
 * **Hardware** : PCB files, gerbers, BOM… coming from Lucas.
 * **Stuff** : for dumping potential codes, examples, snippets… working or not.
 
-# OSC
-
-**Data** : floats normalized between ```0 & 1``` or ```-1 & 1```
-**message** : in the form of ```/addr param1 param1 ...```
-
-**lightboard** : port-12000 - message: ```/led float[0..1]```
-**optical_flow_with_osc** : send: ```/aveFlow x[-1..1] y[-1..1]```
 
 # openFrameworks
 
@@ -23,7 +16,13 @@ Install the OF folder “of_v0.10.1_osx_release” in ```Totem/Code/openFramewor
 “of_v0.10.1_osx_release” is included in the .gitignore .
 
 
+# OSC
 
+**Data** : floats normalized between ```0 & 1``` or ```-1 & 1```
+**message** : in the form of ```/addr param1 param1 ...```
+
+**lightboard** : port-12000 - message: ```/led float[0..1]```
+**optical_flow_with_osc** : send: ```/aveFlow x[-1..1] y[-1..1]```
 
 ### Example for receiving OSC with Processing
 
@@ -81,6 +80,7 @@ Disable auto backup (to avoid cluttering the git) : ```Preference -> increment f
 
 # Syphon
 
+
 Issue with Touch Designer not reconnecting with syphon:
 **Processing** : To stop a program do not click the "stop" button but the close the display window
 **openFrameworks** : To stop a program close the display window
@@ -110,3 +110,4 @@ void ofApp::draw(){
 	mainOutputSyphonServer.publishScreen();
 }
 ```
+
