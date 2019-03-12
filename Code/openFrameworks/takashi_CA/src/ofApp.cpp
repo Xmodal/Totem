@@ -23,6 +23,8 @@ int    Nsize=800;
 double   color[N];
 int  w0,w1,w2,w3,w4,w5,w6,w7,w8;
 
+int count = 0;
+
 void spacetime_initialize(int *x)
 {
     int k,j;
@@ -86,102 +88,7 @@ void  rule_initialize(int nnnn)
     w7  = nnnn- 2*(nnnn/2);
     nnnn = nnnn/2;
 }
-/*--------------------------------------------------------------
- sound production
- -------------------------------------------------------------*/
-void sound_production(int *x,int nnnn)
-{
-    double ddd;
-    
-    int i,j,k;
-    int Nbegin=10,Nend=18;
-    
-    
-    
-    //    printf("itime =  %d\n",itime);
-    int counter = 0;
-    switch(nnnn){
-        case 110:
-            for(k=Nbegin;k<Nend;k++){
-                lll=0;
-                ddd=2;
-                for(j=k;j<(Nsize/2+1);j++){
-                    lll += x[Nsize/2-j-1];
-                }
-                
-                lll = 2.*lll/(Nsize/2+1) -1.0;
-                
-                rrr=0;
-                ddd=2;
-                for(j=k;j<Nsize/2;j++){
-                    rrr += x[Nsize/2+j];
-                }
-                
-                rrr = 2.*rrr/(Nsize/2+1) -1.0;
-                
-                
-                
-                for(j=0;j<iterate;j++)
-                    printf("%6.5lf %6.5lf\t",lll,rrr);
-                resr[counter] = rrr;
-                resl[counter] = lll;
-                counter += 1;
-                // printf("%32.31lf %32.31lf\n",lll,rrr);
-            }
-            printf("\n");
-            
-            
-            
-            break;
-        default:
-            
-            int counter = 0;
-            for(k=Nbegin;k<Nend;k++){
-                
-                //                printf("%6.5lf",k);
-                lll=0;
-                ddd=2;
-                for(j=k;j<(Nsize/2+1);j++){
-                    lll += x[Nsize/2-j]/ddd;
-                    ddd *= 2;
-                }
-                
-                lll = 2*lll -1;
-                
-                rrr=0;
-                ddd=2;
-                for(j=k;j<(Nsize/2-1);j++){
-                    rrr += x[Nsize/2+j+1]/ddd;
-                    ddd *= 2;
-                }
-                
-                rrr = 2.*rrr -1.;
-                
-                
-                
-                
-                //
-                for(j=0;j<iterate;j++)
-                    printf("%6.5lf %6.5lf\t",lll,rrr);
-                resr[counter] = rrr;
-                resl[counter] = lll;
-                counter += 1;
-                
-                
-                //                 printf("%32.31lf %32.31lf\t",lll,rrr);
-                
-                
-                
-                
-                
-                
-            }
-            printf("\n");
-            
-            break;
-    }
-    
-}
+
 
 /*---------------------------------------
  main dynamics controling module
@@ -205,7 +112,6 @@ void dynamics(void){
             xx[i] = rule(x[Nsize-2], x[i], x[0]);
     }
     
-    sound_production(x,nnnn);   /* making sound from the CA pattern */
     
     for(i=0;i<Nsize;i++)
         x[i] = xx[i];
@@ -244,8 +150,8 @@ void billiard(void){
 //--------------------------------------------------------------
 void ofApp::setup(){
     
-    //    ofxSubscribeOsc(12047, "/oc/rulecntl", rulecntl);
-    //    ofxSubscribeOsc(12047, "/oc/framerate", framerate);
+    ofxSubscribeOsc(12047, "/oc/rulecntl", rulecntl);
+    ofxSubscribeOsc(12047, "/oc/framerate", framerate);
     
     ofSetWindowShape(9, 360);
     iseed = 3056;
@@ -264,7 +170,7 @@ void ofApp::setup(){
     ofSetBackgroundColor(0, 0, 0);
     ofSetFrameRate(framerate);
     
-    sender.setup("192.168.100.11", 6448);
+    sender.setup("localhost", 6448);
     
     
     srand48(iseed);
@@ -344,7 +250,9 @@ void ofApp::keyPressed(int key){
     {
         
         rule_initialize(30);
+        x[Nsize/2] = 1;
         
+        /*
         if(iflag==0){
             for(i=0;i<Nsize;i++){
                 if(drand48()>0.5)
@@ -368,6 +276,7 @@ void ofApp::keyPressed(int key){
                     x[i] = 1;
             }
         }
+         */
         
         
         spacetime_initialize(x);

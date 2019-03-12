@@ -3,7 +3,7 @@
 #include "ofMain.h"
 #include "ofxOsc.h"
 #include "ofxSyphon.h"
-//  #include "ofxPubSubOsc.h"
+#include "ofxPubSubOsc.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

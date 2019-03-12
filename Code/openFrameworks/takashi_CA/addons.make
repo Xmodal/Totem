@@ -1,2 +1,3 @@
 ofxOsc
+ofxPubSubOsc
 ofxSyphon
