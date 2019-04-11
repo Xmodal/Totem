@@ -3,8 +3,8 @@
 
 LedMatrix::LedMatrix(int baudRate_, const std::string& serialPort_) : baudRate(baudRate_), serialPort(serialPort_)
 {
-//	serial.listDevices();
-//	vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
+	//	serial.listDevices();
+	//	vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
 }
 
 void LedMatrix::setup()
@@ -33,14 +33,25 @@ void LedMatrix::fill(unsigned char value)
 {
 	//set nothing to be on the screen
 	for (int i = 0; i < LED_MATRIX_WIDTH; i++) {
-		for (int x = 0; x < LED_MATRIX_HEIGHT; x++) {
-			LedMatrix2D[i][x] = value;
+		for (int j = 0; j < LED_MATRIX_HEIGHT; j++) {
+			LedMatrix2D[i][j] = value;
+		}
+	}
+}
+
+void LedMatrix::write(int x, int y, int w, int h, unsigned char* value)
+{
+	int k = 0;
+	for (int i = 0; i < w; i++)
+	{
+		for (int j = 0; j < h; j++)
+		{
+			set(x + i, y + j, value[k++]);
 		}
 	}
 }
 
 void LedMatrix::clear() {
-	//
 	fill(0);
 }
 
@@ -50,8 +61,8 @@ void LedMatrix::flush() {
 	led_string[totalPass++] = 255;
 
 	for (int i = 0; i < LED_MATRIX_WIDTH; i++) {
-		for (int x = 0; x < LED_MATRIX_HEIGHT; x++) {
-			led_string[totalPass++] = LedMatrix2D[i][x];
+		for (int j = 0; j < LED_MATRIX_HEIGHT; j++) {
+			led_string[totalPass++] = LedMatrix2D[i][j];
 		}
 	}
 	serial.writeBytes(led_string, LED_MATRIX_N_LEDS + 1);

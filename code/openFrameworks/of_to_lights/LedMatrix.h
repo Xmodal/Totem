@@ -1,12 +1,10 @@
 #pragma once
 
-#include "ofMain.h"
+#ifndef LED_MATRIX_
+#define LED_MATRIX_
 
-#define LED_MATRIX_WIDTH  9
-#define LED_MATRIX_HEIGHT 360
-#define LED_MATRIX_BOXES 10
-#define LED_MATRIX_HEIGHT_PER_BOX 36
-#define LED_MATRIX_N_LEDS 3240
+#include "ofMain.h"
+#include "defs.h"
 
 class LedMatrix {
 
@@ -17,6 +15,9 @@ public:
 	void set(int x, int y, unsigned char value);
 	unsigned char get(int x, int y);
 	void fill(unsigned char value);
+
+	void write(int x, int y, int w, int h, unsigned char* value);
+
 	void clear();
 	void flush();
 
@@ -28,3 +29,5 @@ private:
 	unsigned char led_string[LED_MATRIX_N_LEDS + 1];
 	ofSerial serial;
 };
+
+#endif
