@@ -18,14 +18,48 @@ Matrix3x3 GlyphBlock::createBase(GlyphType type) const
 	switch (type)
 	{
 		//L case
-	case TYPE_L: 
-			// * . . 
-			// * . .
-			// * * *
-			return Matrix3x3(
-				O, X, X,
-				O, X, X,
-				O, O, O);
+	case TYPE_L:
+		// * . . 
+		// * . .
+		// * * *
+		return Matrix3x3(
+			O, X, X,
+			O, X, X,
+			O, O, O);
+	case TYPE_I:
+		// * * *
+		// . * .
+		// * * *
+		return Matrix3x3(
+			O, O, O,
+			X, O, X,
+			O, O, O);
+	case TYPE_T:
+		// * * *
+		// . * .
+		// . * .
+		return Matrix3x3(
+			O, O, O,
+			X, O, X,
+			X, O, X);
+	case TYPE_U:
+		// * . * 
+		// * . *
+		// * * *
+		return Matrix3x3(
+			O, X, O,
+			O, X, O,
+			O, O, O);
+
+	case TYPE_O:
+		// * * *
+		// * . *
+		// * * *
+		return Matrix3x3(
+			O, O, O,
+			O, X, O,
+			O, O, O);
+
 	default:
 		return Matrix3x3(X, X, X, X, X, X, X, X, X);
 	}

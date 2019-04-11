@@ -6,12 +6,14 @@ Glyph::Glyph(float* typeWeights, float* rotationWeights, float* translationWeigh
 	for (int i = 0; i < N_BLOCKS; i++)
 	{
 		// Randomly choose type, rotation and translation.
-//		GlyphType type = (GlyphType) weightedRandom(typeWeights, N_TYPES);
-//		GlyphRotation rotation = (GlyphRotation)weightedRandom(rotationWeights, N_ROTATIONS);
-//		GlyphTranslation translation = (GlyphTranslation)weightedRandom(translationWeights, N_TRANSLATIONS);
-//		blocks[i] = GlyphBlock(type, rotation, translation);
 
-		blocks[i] = GlyphBlock(TYPE_L, ROTATION_0, TRANSLATION_MIDDLE);
+		GlyphType type = (GlyphType) weightedRandom(typeWeights, N_TYPES);
+		GlyphRotation rotation = (GlyphRotation)weightedRandom(rotationWeights, N_ROTATIONS);
+		GlyphTranslation translation = (GlyphTranslation)weightedRandom(translationWeights, N_TRANSLATIONS);
+		blocks[i] = GlyphBlock(type, rotation, translation);
+
+
+		blocks[i] = GlyphBlock(type, rotation, translation);
 	}
 
 	// Create matrix using blocks. Each row is 9 pixels wide. Number

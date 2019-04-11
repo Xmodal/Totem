@@ -9,7 +9,7 @@ unsigned char x = 0;
 
 void ofApp::setup() 
 {
-	ofSetFrameRate(20);
+	ofSetFrameRate(2);
 	//Serial
 	led.setup();
 	led.clear();
@@ -58,7 +58,6 @@ void ofApp::draw()
 
 Glyph ofApp::addGlyph()
 {
-	
 	// Build random weights.
 	float typeWeights[N_TYPES];
 	Glyph::generateSmoothWeights(typeWeights, float(mouseX) / ofGetWindowWidth(), N_TYPES-1, false);
