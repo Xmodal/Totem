@@ -21,51 +21,63 @@ Install the OF folder “of_v0.10.1_osx_release” in ```Totem/Code/openFramewor
 “of_v0.10.1_osx_release” is included in the .gitignore .
 
 
-
-# Touchdesigner
-
-Disable auto backup (to avoid cluttering the git) : ```Preference -> increment filename on save -> off```
-
-# Syphon
-
-
-Issue with Touch Designer not reconnecting with syphon:
-* **Processing** : To stop a program do not click the "stop" button but the close the display window
-* **openFrameworks** : To stop a program close the display window
-
-**Open Frameworks**
-
-Need ofxSyphon
-
-In ofApp.h
-```
-#include "ofxSyphon.h"
-
-public:
-	ofxSyphonServer mainOutputSyphonServer;
-	ofxSyphonClient mClient;
-```
-
-In ofApp.cpp
-```
-void ofApp::setup(){
-	mainOutputSyphonServer.setName("OF_syphon");
-	mClient.setup();
-}
-
-void ofApp::draw(){
-	mClient.draw(9,360);
-	mainOutputSyphonServer.publishScreen();
-}
-```
-
 # OSC
 
-**Data** : floats normalized between ```0 & 1``` or ```-1 & 1```
-**message** : in the form of ```/addr param1 param1 ...```
+Every message will be of the form
+``` /[side]/[process]/[parameter] [val0] [val1] … ```
 
-**lightboard** : port-12000 - message: ```/led float[0..1]```
-**optical_flow_with_osc** : send: ```/aveFlow x[-1..1] y[-1..1]```
+With:
+* side : A or B (corresponds to the actual sides of the totem)
+* process : CV (computer vision), mixer, SNN, coarse, glyph, transition
+* parameter : depends on process
+* values : floats normalized between ```0 & 1``` or ```-1 & 1```
+
+Exemple:
+``` /A/CV/flowInst 12 -13.5 100 ```
+``` /B/mixer/faders 0 0 0.7 0.3 ```
+
+## CV
+
+* **flow**
+
+Optical flows, gives three values : [x] SUM(vector x) ; [y] SUM (vector y) ; [s] SUM(speed)
+4 different time windows : 0s (instantaneous), 10s, 30s, 60s
+
+messages:
+
+``` 
+/[side]/CV/flow/0 [x] [y] [s]
+/[side]/CV/flow/10 [x] [y] [s]
+/[side]/CV/flow/30 [x] [y] [s]
+/[side]/CV/flow/60 [x] [y] [s]
+```
+
+* **presence**
+
+presence of people in the camera field, one value [0..1] (0: no one / 1: full with people)
+4 different time windows : 0s (instantaneous), 10s, 30s, 60s
+
+messages:
+
+``` 
+/[side]/CV/presence/0 [pres]
+/[side]/CV/presence/10 [pres]
+/[side]/CV/presence/30 [pres]
+/[side]/CV/presence/60 [pres]
+```
+
+## mixer
+
+* **faders**
+corresponds to the mixing of the four visual processes (SNN, coards, glyph, transition).
+4 float values [0..1]
+
+messages:
+
+```
+/[side]/mixer/faders [SNN] [coarse] [glyph] [transition]
+```
+
 
 ### Example for receiving OSC with Processing
 
@@ -117,3 +129,42 @@ void oscEvent(OscMessage theOscMessage) {
   /* send the message */
   oscP5.send(myMessage, myRemoteLocation); 
   ```
+
+
+
+# Touchdesigner
+
+Disable auto backup (to avoid cluttering the git) : ```Preference -> increment filename on save -> off```
+
+# Syphon
+
+
+Issue with Touch Designer not reconnecting with syphon:
+* **Processing** : To stop a program do not click the "stop" button but the close the display window
+* **openFrameworks** : To stop a program close the display window
+
+**Open Frameworks**
+
+Need ofxSyphon
+
+In ofApp.h
+```
+#include "ofxSyphon.h"
+
+public:
+	ofxSyphonServer mainOutputSyphonServer;
+	ofxSyphonClient mClient;
+```
+
+In ofApp.cpp
+```
+void ofApp::setup(){
+	mainOutputSyphonServer.setName("OF_syphon");
+	mClient.setup();
+}
+
+void ofApp::draw(){
+	mClient.draw(9,360);
+	mainOutputSyphonServer.publishScreen();
+}
+```
