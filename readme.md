@@ -40,7 +40,8 @@ Exemple:
 
 * **flow**
 
-Optical flows, gives three values : [x] SUM(vector x) ; [y] SUM (vector y) ; [s] SUM(speed)
+Optical flows, gives three values : [x] SUM(vector x) ; [y] SUM (vector y) ; [s] SUM(speed).
+
 4 different time windows : 0s (instantaneous), 10s, 30s, 60s
 
 messages:
@@ -54,13 +55,14 @@ messages:
 
 * **presence**
 
-presence of people in the camera field, one value [0..1] (0: no one / 1: full with people)
-4 different time windows : 0s (instantaneous), 10s, 30s, 60s
+presence of people in the camera field, one value [0..1] (0: no one / 1: full with people).
+
+4 different time windows : 1s, 10s, 30s, 60s
 
 messages:
 
 ``` 
-/[side]/CV/presence/0 [pres]
+/[side]/CV/presence/1 [pres]
 /[side]/CV/presence/10 [pres]
 /[side]/CV/presence/30 [pres]
 /[side]/CV/presence/60 [pres]
@@ -70,6 +72,7 @@ messages:
 
 * **faders**
 corresponds to the mixing of the four visual processes (SNN, coards, glyph, transition).
+
 4 float values [0..1]
 
 messages:
