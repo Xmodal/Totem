@@ -1,10 +1,40 @@
 #include "LedMatrix.h"
 
 
-LedMatrix::LedMatrix(int baudRate_, const std::string& serialPort_) : baudRate(baudRate_), serialPort(serialPort_)
+LedMatrix::LedMatrix(int baudRate_, const std::string& serialPort_, bool toDisplay) : baudRate(baudRate_), serialPort(serialPort_)
 {
-	//	serial.listDevices();
-	//	vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
+	display = toDisplay;
+	if (display)
+	{
+		std::cout << "Sending display & serial" << std::endl;
+	}
+	else
+		std::cout << "Sending serial only" << std::endl;
+
+	
+	//serial.listDevices();
+	//vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
+}
+
+void LedMatrix::drawOnDisplay() {
+	int size = 35;
+	int spacing = size + 3;
+	int xOffSet = 0;
+	int yOffSet = 0;
+
+	ofSetColor(0, 0, 0);
+
+	for (int x = 0; x < LED_MATRIX_WIDTH; x++) {
+		for (int y = 0; y < LED_MATRIX_HEIGHT; y++) {
+			if (y * spacing > yOffSet + 3500) {
+				xOffSet += LED_MATRIX_WIDTH * size + 30;
+				yOffSet += y * spacing;
+			}
+			ofDrawRectangle((x * spacing) + xOffSet , (y * spacing) - yOffSet , size, size);
+		}
+		xOffSet = 0;
+		yOffSet = 0;
+	}
 }
 
 void LedMatrix::setup()
@@ -29,7 +59,7 @@ unsigned char LedMatrix::get(int x, int y)
 	return LedMatrix2D[x][y];
 }
 
-void LedMatrix::fill(unsigned char value)
+void LedMatrix::fill(unsigned char value = 10)
 {
 	//set nothing to be on the screen
 	for (int i = 0; i < LED_MATRIX_WIDTH; i++) {
@@ -67,3 +97,4 @@ void LedMatrix::flush() {
 	}
 	serial.writeBytes(led_string, LED_MATRIX_N_LEDS + 1);
 }
+

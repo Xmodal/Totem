@@ -1,19 +1,21 @@
 #include "Glyph.h"
+#include <iostream>
 
 Glyph::Glyph(float* typeWeights, float* rotationWeights, float* translationWeights)
 {
 	// Choose all blocks.
 	for (int i = 0; i < N_BLOCKS; i++)
 	{
-		// Randomly choose type, rotation and translation.
-
+		// Randomly choose type, rotation and translation
+		
+		//double check this stuff is it working properly? 
 		GlyphType type = (GlyphType) weightedRandom(typeWeights, N_TYPES);
 		GlyphRotation rotation = (GlyphRotation)weightedRandom(rotationWeights, N_ROTATIONS);
 		GlyphTranslation translation = (GlyphTranslation)weightedRandom(translationWeights, N_TRANSLATIONS);
 		blocks[i] = GlyphBlock(type, rotation, translation);
 
-
-		blocks[i] = GlyphBlock(type, rotation, translation);
+		//Sofian this was here twice? Was it needed? 
+		//blocks[i] = GlyphBlock(type, rotation, translation);
 	}
 
 	// Create matrix using blocks. Each row is 9 pixels wide. Number
@@ -35,7 +37,6 @@ Glyph::Glyph(float* typeWeights, float* rotationWeights, float* translationWeigh
 				row[c] = val;
 			}
 		}
-
 		// If row is empty don't copy to main matrix.
 		if (!rowIsEmpty)
 			matrix.push_back(row);
@@ -50,6 +51,7 @@ int Glyph::weightedRandom(const float* weights, int nWeights) {
 		sum += weights[i];
 	// Pick random value.
 	float rnd = (rand() * sum) / RAND_MAX;
+	std::cout << rnd << std::endl;
 	// Find index.
 	int i = 0;
 	for (int i = 0; i < nWeights; i++)

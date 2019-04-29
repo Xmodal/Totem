@@ -32,5 +32,5 @@ public:
 
 	std::vector<Glyph> text;
 	int row;
-	Glyph currentGlyph;
+	Glyph currentGlyph; 
 };

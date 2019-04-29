@@ -4,16 +4,16 @@
 int baud = 2500000;
 //const std::string& input = "com3";
 
-LedMatrix led(baud, "COM4");
+LedMatrix led(baud, "COM4", true);
 unsigned char x = 0;
 
 void ofApp::setup() 
 {
-	ofSetFrameRate(2);
+	ofSetFrameRate(1);
 	//Serial
 	led.setup();
-	led.clear();
-	led.flush();
+	//led.clear();
+	//led.flush();
 	row = 0;
 
 	currentGlyph = addGlyph();
@@ -21,13 +21,12 @@ void ofApp::setup()
 
 void ofApp::update() 
 {
-	
 	// Reset background.
 	led.clear();
 	led.flush();
 
 	displayGlyph(currentGlyph, row);
-	
+
 	// Add glyph when ready.
 	if (row == currentGlyph.nRows() + 1)
 	{
@@ -52,7 +51,7 @@ void ofApp::update()
 //--------------------------------------------------------------
 void ofApp::draw() 
 {
-
+	led.drawOnDisplay();
 }
 
 
