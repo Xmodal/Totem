@@ -19,6 +19,7 @@ public:
 	void write(int x, int y, int w, int h, unsigned char* value);
 
 	void drawOnDisplay();
+	bool display;
 
 	void clear();
 	void flush();
@@ -26,7 +27,6 @@ public:
 private:
 
 	int baudRate;
-	bool display;
 	std::string serialPort;
 	unsigned char LedMatrix2D[LED_MATRIX_WIDTH][LED_MATRIX_HEIGHT];
 	unsigned char led_string[LED_MATRIX_N_LEDS + 1];

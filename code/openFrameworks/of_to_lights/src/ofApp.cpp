@@ -4,7 +4,7 @@
 int baud = 2500000;
 //const std::string& input = "com3";
 
-LedMatrix led(baud, "COM4", true);
+LedMatrix led(baud, "COM4", false);
 unsigned char x = 0;
 
 void ofApp::setup() 
@@ -51,7 +51,8 @@ void ofApp::update()
 //--------------------------------------------------------------
 void ofApp::draw() 
 {
-	led.drawOnDisplay();
+	if(led.display)
+		led.drawOnDisplay();
 }
 
 

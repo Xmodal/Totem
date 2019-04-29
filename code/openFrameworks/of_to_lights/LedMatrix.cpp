@@ -22,14 +22,13 @@ void LedMatrix::drawOnDisplay() {
 	int xOffSet = 0;
 	int yOffSet = 0;
 
-	ofSetColor(0, 0, 0);
-
 	for (int x = 0; x < LED_MATRIX_WIDTH; x++) {
 		for (int y = 0; y < LED_MATRIX_HEIGHT; y++) {
 			if (y * spacing > yOffSet + 3500) {
 				xOffSet += LED_MATRIX_WIDTH * size + 30;
 				yOffSet += y * spacing;
 			}
+			ofSetColor(LedMatrix2D[x][y]);
 			ofDrawRectangle((x * spacing) + xOffSet , (y * spacing) - yOffSet , size, size);
 		}
 		xOffSet = 0;
@@ -95,6 +94,7 @@ void LedMatrix::flush() {
 			led_string[totalPass++] = LedMatrix2D[i][j];
 		}
 	}
+
 	serial.writeBytes(led_string, LED_MATRIX_N_LEDS + 1);
 }
 
