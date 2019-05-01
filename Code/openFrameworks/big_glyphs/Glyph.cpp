@@ -1,85 +1,75 @@
 #include "Glyph.h"
 #include <iostream>
 
-Glyph::Glyph(float* typeWeights, float* rotationWeights, float* translationWeights)
+Glyph::Glyph(const GlyphBlockFactory& topFactory, const GlyphBlockFactory& subFactory, float subdivisionProbability)
 {
-	// Choose all blocks.
-	for (int i = 0; i < N_BLOCKS; i++)
-	{
-		// Randomly choose type, rotation and translation
-		
-		//double check this stuff is it working properly? 
-		GlyphType type = (GlyphType) weightedRandom(typeWeights, N_TYPES);
-		GlyphRotation rotation = (GlyphRotation)weightedRandom(rotationWeights, N_ROTATIONS);
-		GlyphTranslation translation = (GlyphTranslation)weightedRandom(translationWeights, N_TRANSLATIONS);
-		blocks[i] = GlyphBlock(type, rotation, translation);
+	// Create top-level blocks.
+	for (int i = 0; i < N_TOP_BLOCKS; i++)
+		topBlocks[i] = topFactory.create();
 
-		//Sofian this was here twice? Was it needed? 
-		//blocks[i] = GlyphBlock(type, rotation, translation);
-	}
+	// Re-useable empty block.
+	GlyphBlock emptyBlock;
 
-	// Create matrix using blocks. Each row is 9 pixels wide. Number
-	// of rows vary between 1 and 3.
-	matrix.clear();
-	for (int r = 0; r < BLOCK_SIDE; r++)
+	// Create sub-blocks.
+	for (int i = 0; i < N_TOP_BLOCKS; i++)
 	{
-		// Fill up one row.
-		std::array<bool, LED_MATRIX_WIDTH> row;
-		int c = 0; // column
-		bool rowIsEmpty = true;
-		for (int b = 0; b < N_BLOCKS; b++)
-		{
-			for (int j = 0; j < BLOCK_SIDE; j++, c++)
-			{
-				bool val = blocks[b].get(r, j);
-				if (val)
-					rowIsEmpty = false;
-				row[c] = val;
+		// Preserve current, previous and next top-level blocks (to generate connections between top-blocks).
+		GlyphBlock& currentTopBlock = topBlocks[i];
+		GlyphBlock& prevTopBlock = (i == 0 ? emptyBlock : topBlocks[i - 1]);
+		GlyphBlock& nextTopBlock = (i == N_TOP_BLOCKS - 1 ? emptyBlock : topBlocks[i + 1]);
+
+		// For each column j inside top-block.
+		for (int j = 0; j < BLOCK_SIDE; j++) {
+			// For each row k inside top-block.
+			for (int k = 0; k < BLOCK_SIDE; k++) {
+				GlyphBlock newBlockOnTheBlock;
+				// If top-block contains element: draw something there.
+				if (topBlocks[i].get(j, k)) {
+					float rnd = float(rand()) / RAND_MAX; // pick random number in [0, 1]
+					
+					// Subdivide using a generative block.
+					if (rnd < subdivisionProbability)
+					{
+						newBlockOnTheBlock = subFactory.create();
+					}
+
+					// Do not subdivide: use basic connection block.
+					else {
+						newBlockOnTheBlock = GlyphBlock(
+							currentTopBlock.getIfExists(j-1, k), // left
+							currentTopBlock.getIfExists(j, k-1, prevTopBlock, nextTopBlock), // top
+							currentTopBlock.getIfExists(j+1, k), // right
+							currentTopBlock.getIfExists(j, k+1, prevTopBlock, nextTopBlock)); // bottom
+						//newBlockOnTheBlock = GlyphBlock(
+						//  currentTopBlock.getIfExists(j, k-1, prevTopBlock, nextTopBlock),
+						//  i == 0 ? prevTopBlock.get(2, k) : currentTopBlock.getIfExists(j-1, k),
+						//  currentTopBlock.getIfExists(j, k+1),
+						//  i == (N_TOP_BLOCKS-1) ? nextTopBlock.get(0, k) : currentTopBlock.getIfExists(j+1, k));
+					}
+				}
+				// Otherwise: empty block.
+				else
+					newBlockOnTheBlock = emptyBlock;
+				blocks[i][j][k] = newBlockOnTheBlock;
 			}
 		}
-		// If row is empty don't copy to main matrix.
-		if (!rowIsEmpty)
-			matrix.push_back(row);
 	}
-	
-}
 
-int Glyph::weightedRandom(const float* weights, int nWeights) {
-	// Sum the weights.
-	float sum = 0;
-	for (int i=0; i<nWeights; i++)
-		sum += weights[i];
-	// Pick random value.
-	float rnd = (rand() * sum) / RAND_MAX;
-	std::cout << rnd << std::endl;
-	// Find index.
-	int i = 0;
-	for (int i = 0; i < nWeights; i++)
-	{
-		rnd -= weights[i];
-		if (rnd <= 0)
-			return i;
-		i++;
-	}
-	return i;
-}
-
-void Glyph::generateSmoothWeights(float* weights, float proportion, int nWeights, bool wrapAround)
-{
-	for (int i = 0; i < nWeights; i++)
-		weights[i] = 0.1f;
-	int maxIndex = int(proportion * nWeights);
-	weights[maxIndex] = 1.0f;
-	if (wrapAround)
-	{
-		weights[(maxIndex - 1 + nWeights) % nWeights] = 0.25f;
-		weights[(maxIndex + 1) % nWeights] = 0.25f;
-	}
-	else
-	{
-		if (maxIndex > 0)
-			weights[maxIndex - 1] = 0.25f;
-		if (maxIndex < nWeights - 1)
-			weights[maxIndex + 1] = 0.25f;
+	// Each top block.
+	for (int top = 0, yOffset = 0; top < N_TOP_BLOCKS; top++) {
+		// Each row.
+		for (int row = 0; row < BLOCK_SIDE; row++, yOffset += BLOCK_SIDE) {
+			// Each column.
+			for (int col = 0, xOffset = 0; col < BLOCK_SIDE; col++, xOffset += BLOCK_SIDE) {
+				// Get current block.
+				GlyphBlock currentBlock = blocks[top][col][row];
+				// Copy it into the matrix in the right spot.
+				for (int x = 0; x < BLOCK_SIDE; x++) {
+					for (int y = 0; y < BLOCK_SIDE; y++) {
+						matrix[xOffset + x][yOffset + y] = currentBlock.get(x, y);
+					}
+				}
+			}
+		}
 	}
 }

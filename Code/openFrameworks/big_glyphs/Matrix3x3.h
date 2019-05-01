@@ -24,6 +24,14 @@ public:
 		return matrix[i * 3 + j];
 	}
 
+	void setXY(int x, int y, bool value) {
+		set(y, x, value);
+	}
+
+	bool getXY(int x, int y) const {
+		return get(y, x);
+	}
+
 	const bool* operator[] (int i) const { return &matrix[i * 3]; }
 
 };

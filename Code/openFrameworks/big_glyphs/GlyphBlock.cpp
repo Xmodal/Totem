@@ -1,5 +1,9 @@
 #include "GlyphBlock.h"
 
+GlyphBlock::GlyphBlock() {
+	GlyphBlock::GlyphBlock(TYPE_VOID, ROTATION_0, TRANSLATION_MIDDLE);
+}
+
 GlyphBlock::GlyphBlock(GlyphType type, GlyphRotation rotation, GlyphTranslation translation)
 {
 	// Get base block.
@@ -21,9 +25,6 @@ GlyphBlock::GlyphBlock(bool left, bool top, bool right, bool bottom) {
 	);
 }
 
-
-
-
 Matrix3x3 GlyphBlock::createBase(GlyphType type) const 
 {
 	switch (type)
@@ -38,13 +39,13 @@ Matrix3x3 GlyphBlock::createBase(GlyphType type) const
 			O, X, X,
 			O, O, O);
 	case TYPE_I:
-		// * * *
 		// . * .
-		// * * *
+		// . * .
+		// . * .
 		return Matrix3x3(
-			O, O, O,
 			X, O, X,
-			O, O, O);
+			X, O, X,
+			X, O, X);
 	case TYPE_T:
 		// * * *
 		// . * .
