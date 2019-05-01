@@ -19,8 +19,8 @@ int ConstParams::Inhibitory_Neuron_Type = ConstParams::Chattering; //original wa
 
 int ConstParams::Input_Neuron_Size  = ConstParams::Number_Of_Neurons/5;
 int ConstParams::Output_Neuron_Size = ConstParams::Number_Of_Neurons/5;
-int ConstParams::Input_Group_Size  = 8;
-int ConstParams::Output_Group_Size = 8;
+int ConstParams::Input_Group_Size  = 10;
+int ConstParams::Output_Group_Size = 10;
 int ConstParams::Input_Neuron_Per_Group  = ConstParams::Input_Neuron_Size/ConstParams::Input_Group_Size;
 int ConstParams::Output_Neuron_Per_Group = ConstParams::Output_Neuron_Size/ConstParams::Output_Group_Size;
 

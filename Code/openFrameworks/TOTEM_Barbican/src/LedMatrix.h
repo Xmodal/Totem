@@ -14,6 +14,7 @@ public:
 	void setup();
 	void set(int x, int y, unsigned char value);
     void set(int x, int y, unsigned char value, float mix);
+    void addTo(int x, int y, unsigned char value, float mix);
 	unsigned char get(int x, int y);
 	void fill(unsigned char value);
 

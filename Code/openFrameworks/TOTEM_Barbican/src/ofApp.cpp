@@ -1,6 +1,11 @@
 #include "ofApp.h"
 
-LedMatrix led_matrix_snn_raw(2500000, "/dev/tty.usbmodem4621901", false);
+LedMatrix display_snn_raw(0, "", false);
+LedMatrix display_snn_output(0, "", false);
+LedMatrix display_glyph(0, "", false);
+LedMatrix display_transition(0, "", false);
+LedMatrix totem_side_A(2500000, "/dev/tty.usbmodem4621901", true);
+LedMatrix totem_side_B(2500000, "", true);
 
 
 //--------------------------------------------------------------
@@ -9,7 +14,7 @@ void ofApp::setup(){
     ofSetBackgroundAuto(true);
     ofSetVerticalSync(false);
     ofSetFrameRate(30);
-    ofBackground(0);
+    ofBackground(10);
     
     std::cout.precision(11);
     
@@ -21,13 +26,25 @@ void ofApp::setup(){
     //------
     //DISPLAY
     //------
-    led_matrix_snn_raw.setup();
+    display_snn_raw.setup();
+    display_snn_output.setup();
+    display_glyph.setup();
+    totem_side_A.setup();
+    totem_side_B.setup();
     
     //------
     //OSC
     //------
     
     ofxSubscribeOsc(7511, "/SNN/stimulation", stimulation_val);
+    ofxSubscribeOsc(7511, "/SNN/neuron_getV_offset", neuron_getV_offset);
+    
+    ofxSubscribeOsc(7511, "/transition/global_value", global_value);
+    
+    ofxSubscribeOsc(7511, "/mixer/A/faders", mixing_val_A);
+    ofxSubscribeOsc(7511, "/mixer/B/faders", mixing_val_B);
+    
+    
     
 }
 //--------------------------------------------------------------
@@ -39,22 +56,55 @@ void ofApp::update(){
         spike_net.stimulation(i, stimulation_val[i]); // (input group id, stimlation strength)
     }
 
-    
     //update processes
     spike_net.update();
     
     //update displays
-    led_matrix_snn_raw.clear();
+    display_snn_raw.clear();
+    display_snn_output.clear();
+    display_glyph.clear();
+    display_transition.clear();
+    totem_side_A.clear();
+    totem_side_B.clear();
     
-    for(int i=0; i<ConstParams::Number_Of_Neurons; i++){
-        led_matrix_snn_raw.set(i%9, int(i/9), spike_net.neurons[i].getV()+100, set_mix);
+    //populate raw SNN matrix
+    for(i=0; i<ConstParams::Number_Of_Neurons; i++){
+        display_snn_raw.set(i%9, int(i/9), ofClamp(spike_net.neurons[i].getV()+neuron_getV_offset, 0, 254));
     }
     
+    //populate SNN output matrix
+    
+    //populate glyph matrix
+    
+    //populate transition matrix
+    for(i=0; i<ConstParams::Number_Of_Neurons; i++){
+        display_transition.set(i%9, int(i/9), global_value);
+    }
+    
+    //populate totem A matrix
+    for(i = 0; i < LED_MATRIX_WIDTH; i++){
+        for(j = 0; j < LED_MATRIX_HEIGHT; j++){
+            totem_side_A.addTo(i, j, display_snn_raw.get(i,j), mixing_val_A[0]);
+            //totem_side_A.addTo(i, j, display_snn_output.get(i,j), mixing_val_A[1]);
+            //totem_side_A.addTo(i, j, display_glyph.get(i,j), mixing_val_A[2]);
+            totem_side_A.addTo(i, j, display_transition.get(i,j), mixing_val_A[3]);
+        }
+    }
+    //populate totem B matrix
+    /*
+    for(i = 0; i < LED_MATRIX_WIDTH; i++){
+        for(j = 0; j < LED_MATRIX_HEIGHT; j++){
+            totem_side_B.addTo(i, j, display_snn_raw.get(i,j), mixing_val_B[0]);
+            //totem_side_B.addTo(i, j, display_snn_output.get(i,j), mixing_val_B[1]);
+            //totem_side_B.addTo(i, j, display_glyph.get(i,j), mixing_val_B[2]);
+            //totem_side_B.addTo(i, j, display_transition.get(i,j), mixing_val_B[3]);
+        }
+    }
+     */
+    
     //flush serial
-    //led_matrix_snn_raw.flush();
-    
-    
-    
+    totem_side_A.flush();
+    //totem_side_B.flush();
     
    
     
@@ -65,7 +115,12 @@ void ofApp::draw(){
     gui.draw();
     
     //draw displays
-    led_matrix_snn_raw.drawOnDisplay(size_display, 1, 10, 10);
+    display_snn_raw.drawOnDisplay(size_display, 0, 10, 10);
+    display_snn_output.drawOnDisplay(size_display, 0, 50, 10);
+    display_glyph.drawOnDisplay(size_display, 0, 90, 10);
+    display_transition.drawOnDisplay(size_display, 0, 130, 10);
+    totem_side_A.drawOnDisplay(size_display, 0, 170, 10);
+    totem_side_B.drawOnDisplay(size_display, 0, 210, 10);
     
 }
 
@@ -90,7 +145,6 @@ void ofApp::setupGui(){
     gui.setup();
     gui.add(size_display.setup("Display size", 3, 1, 10));
     gui.add(fps.setup("FPS", 30, 1, 300));
-    gui.add(set_mix.setup("mix", 1, -1, 5));
     gui.add(start_message.setup("press <space> to restart", ""));
     gui.add(set_stp_flag.setup( "stp flag" , false));
     gui.add(set_stdp_flag.setup( "stdp flag" , true));
@@ -104,7 +158,6 @@ void ofApp::setupGui(){
     gui.add(set_inhibitory_number.setup( "Inhibitory portion" , 5, 1, 15));
     gui.add(set_input_number.setup( "Input portion" , 5, 1, 15));
     gui.add(set_number_of_connection.setup( "Number of connections" , 20, 1, 60));
-    gui.add(set_led_val_offset.setup( "LED offset" , 50, -100, 100));
 }
 
 //--------------------------------------------------------------

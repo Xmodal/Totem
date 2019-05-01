@@ -49,13 +49,24 @@ private:
     
     int i, j, k;
     
-    int led_val_offset = 50;
-
     SpikingNet spike_net;
     SpikeNetWriter writer_weight, writer_spike;
     
+    //raw snn variables
+    int stimulation_val[10]; //dimension is ConstParams::Input_Group_Size
+    int neuron_getV_offset = 0;
     
-    int stimulation_val[8]; //dimension is ConstParams::Input_Group_Size
+    //output snn variables
+    
+    //glyphs variables
+    
+    //transition variables
+    int global_value = 0;
+    
+    //mixing variables
+    float mixing_val_A[4];
+    float mixing_val_B[4];
+    
     
     ofxLabel start_message;
     ofxPanel gui;
@@ -74,7 +85,5 @@ private:
     ofxIntSlider set_inhibitory_number;
     ofxIntSlider set_input_number;
     ofxIntSlider set_number_of_connection;
-    ofxIntSlider set_led_val_offset;
-    ofxFloatSlider set_mix;
 
 };

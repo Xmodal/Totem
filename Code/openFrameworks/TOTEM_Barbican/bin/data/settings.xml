@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<group>
+	<Display_size>3</Display_size>
+	<FPS>30</FPS>
+	<stp_flag>0</stp_flag>
+	<stdp_flag>1</stdp_flag>
+	<Number_of_Neurons>3240</Number_of_Neurons>
+	<Network_type>3</Network_type>
+	<Inhibitory_type>5</Inhibitory_type>
+	<Excitatory_type>5</Excitatory_type>
+	<Inhibitory_portion>5</Inhibitory_portion>
+	<Input_portion>5</Input_portion>
+	<Number_of_connections>20</Number_of_connections>
+</group>
