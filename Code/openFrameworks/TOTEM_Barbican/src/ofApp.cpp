@@ -4,7 +4,9 @@ LedMatrix display_snn_raw(0, "", false);
 LedMatrix display_snn_output(0, "", false);
 LedMatrix display_glyph(0, "", false);
 LedMatrix display_transition(0, "", false);
-LedMatrix totem_side_A(2500000, "/dev/tty.usbmodem4621901", true);
+//LedMatrix totem_side_A(2500000, "/dev/tty.usbmodem4621901", true);
+//LedMatrix totem_side_A(2500000, "/dev/tty.usbmodem4072061", true);
+LedMatrix totem_side_A(2500000, "/dev/tty.usbmodem4075901", true);
 LedMatrix totem_side_B(2500000, "", true);
 
 
