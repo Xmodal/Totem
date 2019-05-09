@@ -40,6 +40,8 @@ void ofApp::setup(){
     //OSC
     //------
     
+    osc_sender_msx.setup("localhost", 7510);
+    
     //SUSCRIBE
     ofxSubscribeOsc(7511, "/SNN/stimulation", stimulation_val);
     
@@ -48,8 +50,10 @@ void ofApp::setup(){
     ofxSubscribeOsc(7511, "/SNN/set_network_type", set_network_type);
     ofxSubscribeOsc(7511, "/SNN/set_inhibitory_neuron_type", set_inhibitory_neuron_type);
     ofxSubscribeOsc(7511, "/SNN/set_excitatory_neuron_type", set_excitatory_neuron_type);
-    ofxSubscribeOsc(7511, "/SNN/set_inhibitory_group_size", set_inhibitory_group_size);
+    ofxSubscribeOsc(7511, "/SNN/set_inhibitory_portion", set_inhibitory_portion);
+    ofxSubscribeOsc(7511, "/SNN/set_input_portion", set_input_portion);
     ofxSubscribeOsc(7511, "/SNN/set_input_group_size", set_input_group_size);
+    ofxSubscribeOsc(7511, "/SNN/set_output_portion", set_output_portion);
     ofxSubscribeOsc(7511, "/SNN/set_output_group_size", set_output_group_size);
     ofxSubscribeOsc(7511, "/SNN/set_number_of_connections", set_number_of_connections);
     ofxSubscribeOsc(7511, "/SNN/set_stp_flag", set_stp_flag);
@@ -59,6 +63,9 @@ void ofApp::setup(){
         initSNN();
     });
     
+    ofxSubscribeOsc(7511, "/SNN_output/Output_Time_Window", Output_Time_Window);
+    ofxSubscribeOsc(7511, "/SNN_output/spiked_scalar", spiked_scalar);
+    
     ofxSubscribeOsc(7511, "/transition/global_value", global_value);
     
     ofxSubscribeOsc(7511, "/mixer/A/faders", mixing_val_A);
@@ -67,8 +74,9 @@ void ofApp::setup(){
     ofxSubscribeOsc(7511, "/display/fps", fps);
     
     //PUBLISH
-    ofxPublishOsc("localhost", 7510, "/display/A/ms_since_last_output", &msSinceLastOutput_A, false);
+    //ofxPublishOsc("localhost", 7510, "/display/A/ms_since_last_output", &msSinceLastOutput_A, false);
     //ofxPublishOsc("localhost", 7510, "/display/B/ms_since_last_output", &msSinceLastOutput_B, false);
+//    ofxPublishOsc("localhost", 7510, "/SNN_output/spiked_output", &spiked_output[], false); // not working with osfPublishAsArray
     
     
     
@@ -78,15 +86,33 @@ void ofApp::update(){
     ofSetFrameRate(fps);
     updateGui();
     
+    //----------
     //update parameters
+    //----------
     for(i=0; i < ConstParams::Input_Group_Size; i++){
         spike_net.stimulation(i, stimulation_val[i]); // (input group id, stimlation strength)
     }
-
+    //----------
     //update processes
+    //----------
     spike_net.update();
     
+    //get firing rates
+    float n = ConstParams::Output_Neuron_Size/ConstParams::Output_Group_Size;
+    osc_spiked_output.clear();
+    osc_spiked_output.setAddress("/SNN_output/spiked_output");
+    for(i=0;i<ConstParams::Output_Group_Size;i++){
+        spiked_output[i] = spike_net.getSpikedOutput(i)/(n*Output_Time_Window);
+        osc_spiked_output.addFloatArg(spiked_output[i]);
+    }
+    osc_sender_msx.sendMessage(osc_spiked_output);
+    if(ofGetFrameNum()%Output_Time_Window == 0){
+        spike_net.clearSpikedNeuronId();
+    }
+    
+    //----------
     //update displays
+    //----------
     display_snn_raw.clear();
     display_snn_output.clear();
     display_glyph.clear();
@@ -100,6 +126,9 @@ void ofApp::update(){
     }
     
     //populate SNN output matrix
+    for(i=0; i<ConstParams::Number_Of_Neurons; i++){
+        display_snn_output.set(i%9, int(i/9), ofClamp(spiked_scalar*spiked_output[int(i/324)], 0, 254));
+    }
     
     //populate glyph matrix
     
@@ -117,8 +146,8 @@ void ofApp::update(){
             totem_side_A.addTo(i, j, display_transition.get(i,j), mixing_val_A[3]);
         }
     }
-    //populate totem B matrix
     
+    //populate totem B matrix
     for(i = 0; i < LED_MATRIX_WIDTH; i++){
         for(j = 0; j < LED_MATRIX_HEIGHT; j++){
             totem_side_B.addTo(i, j, display_snn_raw.get(i,j), mixing_val_B[0]);
@@ -129,6 +158,9 @@ void ofApp::update(){
     }
     
     
+    //----------
+    //serial
+    //----------
     
     //flush serial
     totem_side_A.flush();
@@ -158,18 +190,20 @@ void ofApp::draw(){
 //--------------------------------------------------------------
 void ofApp::initSNN(){
     ConstParams::Number_Of_Neurons = set_number_of_neurons;
-    ConstParams::Inhibitory_Group_Size = set_inhibitory_group_size;
-    ConstParams::Number_Of_Inhibitory = ConstParams::Number_Of_Neurons/ConstParams::Inhibitory_Group_Size;
+    ConstParams::Inhibitory_Portion = set_inhibitory_portion;
+    ConstParams::Number_Of_Inhibitory = ConstParams::Number_Of_Neurons/ConstParams::Inhibitory_Portion;
     ConstParams::Number_Of_Connection = set_number_of_connections;
     
     ConstParams::Network_Type = set_network_type;
     ConstParams::Excitatory_Neuron_Type = set_excitatory_neuron_type;
     ConstParams::Inhibitory_Neuron_Type = set_inhibitory_neuron_type;
     
+    ConstParams::Input_Portion  = set_input_portion;
+    ConstParams::Output_Portion = set_output_portion;
     ConstParams::Input_Group_Size  = set_input_group_size;
     ConstParams::Output_Group_Size = set_output_group_size;
-    ConstParams::Input_Neuron_Size  = ConstParams::Number_Of_Neurons/ConstParams::Input_Group_Size;
-    ConstParams::Output_Neuron_Size = ConstParams::Number_Of_Neurons/ConstParams::Output_Group_Size;
+    ConstParams::Input_Neuron_Size  = ConstParams::Number_Of_Neurons/ConstParams::Input_Portion;
+    ConstParams::Output_Neuron_Size = ConstParams::Number_Of_Neurons/ConstParams::Output_Portion;
     ConstParams::Input_Neuron_Per_Group  = ConstParams::Input_Neuron_Size/ConstParams::Input_Group_Size;
     ConstParams::Output_Neuron_Per_Group = ConstParams::Output_Neuron_Size/ConstParams::Output_Group_Size;
     

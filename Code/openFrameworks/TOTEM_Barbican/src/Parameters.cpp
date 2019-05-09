@@ -10,19 +10,22 @@
 
 // network settings
 int ConstParams::Number_Of_Neurons = 3240; //1 side = 9 * 36 * 10 = 3240
-int ConstParams::Inhibitory_Group_Size = 5;
-int ConstParams::Number_Of_Inhibitory = ConstParams::Number_Of_Neurons/ConstParams::Inhibitory_Group_Size;
+int ConstParams::Inhibitory_Portion = 5;
+int ConstParams::Number_Of_Inhibitory = ConstParams::Number_Of_Neurons/ConstParams::Inhibitory_Portion;
 int ConstParams::Number_Of_Connection = 20; //each neuron
 
 int ConstParams::Network_Type = Grid_network;//Sparse_Network Random_Network Uniform_Network Grid_network 6
 int ConstParams::Excitatory_Neuron_Type = ConstParams::Chattering; //original was const
 int ConstParams::Inhibitory_Neuron_Type = ConstParams::Chattering; //original was const
 
-int ConstParams::Input_Group_Size  = 10;
-int ConstParams::Output_Group_Size = 10;
-int ConstParams::Input_Neuron_Size  = ConstParams::Number_Of_Neurons/ConstParams::Input_Group_Size;
-int ConstParams::Output_Neuron_Size = ConstParams::Number_Of_Neurons/ConstParams::Output_Group_Size;
+int ConstParams::Input_Portion = 5;
+int ConstParams::Input_Group_Size  = 8;
+int ConstParams::Input_Neuron_Size  = ConstParams::Number_Of_Neurons/ConstParams::Input_Portion;
 int ConstParams::Input_Neuron_Per_Group  = ConstParams::Input_Neuron_Size/ConstParams::Input_Group_Size;
+
+int ConstParams::Output_Portion = 5;
+int ConstParams::Output_Group_Size = 10;
+int ConstParams::Output_Neuron_Size = ConstParams::Number_Of_Neurons/ConstParams::Output_Portion;
 int ConstParams::Output_Neuron_Per_Group = ConstParams::Output_Neuron_Size/ConstParams::Output_Group_Size;
 
 // synapse settings
