@@ -17,6 +17,7 @@ class ConstParams
 {
 public:
     static int Number_Of_Neurons;
+    static int Inhibitory_Group_Size;
     static int Number_Of_Inhibitory;
     static int Number_Of_Connection;
     static int Input_Neuron_Size;

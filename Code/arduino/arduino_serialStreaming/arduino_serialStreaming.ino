@@ -10,7 +10,8 @@ CRGB leds[COLS][ROWS];//holds the values of the leds for fastled output
 
 int indexcount;//counter for serial, resets on incoming byte 255, then counts which led the serial is receiving
 
-float lastOutputTime;//used as a counter to limit the output rate to 60fps, when lastoutputtime is bigger then current time minus 16milliseconds, sends data to leds
+unsigned long lastOutputTime = 0;
+unsigned long timeSinceLastOutput = 0;
 
 void setup() {
   lastOutputTime = 0;
@@ -31,36 +32,57 @@ void setup() {
 void loop() {
 
   //the following sets a single led's value and the counter
-  while (Serial.available() > 0) {
-    int incomingByte = Serial.read();//read single byte
-    if (incomingByte == 255)//reset byte is 255, resets the counter for setting led values
-    {
-      indexcount = 0;//reset counter
-    }
-    else //not start byte, so value byte. value between 0 and 254 correspond to led brightness
-    {
-      int value = incomingByte;
-      if (indexcount < ROWS * COLS)//check if counter hasn't glitched
+  if (Serial.available()) {
+    while (Serial.available() > 0) {
+      int incomingByte = Serial.read();//read single byte
+      if (incomingByte == 255)//reset byte is 255, resets the counter for setting led values
       {
-        int x = indexcount%COLS;
-        int y = indexcount/COLS; //get strip output index [0 -> 9] from counter
-        //set led values
-        leds[x][y].red = value;
-        leds[x][y].green = value;
-        leds[x][y].blue = value;
+        indexcount = 0;//reset counter
       }
-      indexcount++;// increment counter to next led
+      else //not start byte, so value byte. value between 0 and 254 correspond to led brightness
+      {
+        int value = incomingByte;
+        if (indexcount < ROWS * COLS)//check if counter hasn't glitched
+        {
+          int x = indexcount % COLS;
+          int y = indexcount / COLS; //get strip output index [0 -> 9] from counter
+          //set led values
+          leds[x][y].red = value;
+          leds[x][y].green = value;
+          leds[x][y].blue = value;
+        }
+        indexcount++;// increment counter to next led
+      }
     }
+    
+      FastLED.show();//send led data to strips
+
+      //Serial watchdog
+      
+      timeSinceLastOutput = millis() - lastOutputTime;
+      Serial.write(255);
+      Serial.write(timeSinceLastOutput & 11111111);
+
+      lastOutputTime = millis();//update time for output counter
+    
   }
 
 
+/*
   //fastled output
   if (millis() - lastOutputTime   > 15)//check if it's been 15 milliseconds since last output (don't want to output too fast)
   {
     //Serial.println(millis() - lastOutputTime);//uncomment for debugging: print framerate (frame duriation, should print 15)
     FastLED.show();//send led data to strips
+
+    //Serial watchdog
+    timeSinceLastOutput = constrain(millis() - lastOutputTime, 0, 254);
+    Serial.write(255);
+    Serial.write(char(timeSinceLastOutput));
+
     lastOutputTime = millis();//update time for output counter
   }
+*/
 
 }
 

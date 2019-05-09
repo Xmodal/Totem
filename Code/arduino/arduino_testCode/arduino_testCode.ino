@@ -1,12 +1,13 @@
 #include <FastLED.h>
 
-#define NUM_LEDS 396// 36 leds * 11 boxes, number of leds per output (9 per pcb)
+#define NUM_LEDS 360// 36 leds * 11 boxes, number of leds per output (9 per pcb)
 CRGB leds[9][NUM_LEDS];//holds the values of the leds for fastled output
 #define RATE 3 // 3 seems like the ideal value, slowdown if glitches appear at the end of the strips but watchout for dropping FPS
 
 //set teensy at 144 mhz
 
 float lastOutputTime;//used as a counter to limit the output rate to 60fps, when lastoutputtime is bigger then current time minus 16milliseconds, sends data to leds
+int val = 0;
 
 void setup() {
   lastOutputTime = 0;
@@ -20,14 +21,17 @@ void setup() {
   FastLED.addLeds<APA102, 0, 1, BGR, DATA_RATE_MHZ(RATE)>(leds[8], NUM_LEDS);
   FastLED.addLeds<APA102, 3, 4, BGR, DATA_RATE_MHZ(RATE)>(leds[7], NUM_LEDS);
   FastLED.addLeds<APA102, 19, 18, BGR, DATA_RATE_MHZ(RATE)>(leds[6], NUM_LEDS);
+
+  pinMode(13, OUTPUT);     
 }
 
 void loop() {
-  //fastled output
-  if (millis() - lastOutputTime   > 15)//check if it's been 15 milliseconds since last output (don't want to output too fast)
-  {
-    for (int x = 0; x < 9; x++)//loop trough the 9 led strips outputs
+  /*
+    //fastled output
+    if (millis() - lastOutputTime   > 15)//check if it's been 15 milliseconds since last output (don't want to output too fast)
     {
+    for (int x = 0; x < 9; x++)//loop trough the 9 led strips outputs
+    { 
       for (int i = 0; i < 36; i++)//loop through the first 36 leds of the strip (change 36 to 386 for the 11 boxes)
       {
         int value = 0;
@@ -43,6 +47,25 @@ void loop() {
     }
     FastLED.show();//send led data to strips
     lastOutputTime = millis();//update time for output counter
+    }
+  */
+  val = (val+1)%50;
+  for (int x = 0; x < 9; x++)//loop trough the 9 led strips outputs
+  {
+    for (int i = 0; i < 360; i++)//loop through the first 36 leds of the strip (change 36 to 386 for the 11 boxes)
+    {                     
+      int ran = random(205);
+      leds[x][i].red = val + ran;
+      leds[x][i].green = val + ran;
+      leds[x][i].blue = val + ran;
+
+    }
   }
+  FastLED.show();//send led data to strips
+
+  digitalWrite(13,HIGH);
+  delay(25);
+  digitalWrite(13,LOW);
+  delay(25);
 }
 

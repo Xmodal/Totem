@@ -5,8 +5,10 @@ LedMatrix display_snn_output(0, "", false);
 LedMatrix display_glyph(0, "", false);
 LedMatrix display_transition(0, "", false);
 //LedMatrix totem_side_A(2500000, "/dev/tty.usbmodem4621901", true);
-//LedMatrix totem_side_A(2500000, "/dev/tty.usbmodem4072061", true);
-LedMatrix totem_side_A(2500000, "/dev/tty.usbmodem4075901", true);
+LedMatrix totem_side_A(2500000, "/dev/tty.usbmodem4072061", true);
+//LedMatrix totem_side_A(2500000, "/dev/tty.usbmodem4075901", true);
+//LedMatrix totem_side_A(2500000, "/dev/tty.usbmodem4660021", true);
+
 LedMatrix totem_side_B(2500000, "", true);
 
 
@@ -38,19 +40,42 @@ void ofApp::setup(){
     //OSC
     //------
     
+    //SUSCRIBE
     ofxSubscribeOsc(7511, "/SNN/stimulation", stimulation_val);
+    
     ofxSubscribeOsc(7511, "/SNN/neuron_getV_offset", neuron_getV_offset);
+    ofxSubscribeOsc(7511, "/SNN/number_of_neurons", set_number_of_neurons);
+    ofxSubscribeOsc(7511, "/SNN/set_network_type", set_network_type);
+    ofxSubscribeOsc(7511, "/SNN/set_inhibitory_neuron_type", set_inhibitory_neuron_type);
+    ofxSubscribeOsc(7511, "/SNN/set_excitatory_neuron_type", set_excitatory_neuron_type);
+    ofxSubscribeOsc(7511, "/SNN/set_inhibitory_group_size", set_inhibitory_group_size);
+    ofxSubscribeOsc(7511, "/SNN/set_input_group_size", set_input_group_size);
+    ofxSubscribeOsc(7511, "/SNN/set_output_group_size", set_output_group_size);
+    ofxSubscribeOsc(7511, "/SNN/set_number_of_connections", set_number_of_connections);
+    ofxSubscribeOsc(7511, "/SNN/set_stp_flag", set_stp_flag);
+    ofxSubscribeOsc(7511, "/SNN/set_stdp_flag", set_stdp_flag);
+    ofxSubscribeOsc(7511, "/SNN/set_decay_rate", set_decay_rate);
+    ofxSubscribeOsc(7511, "/SNN/init", [this](){
+        initSNN();
+    });
     
     ofxSubscribeOsc(7511, "/transition/global_value", global_value);
     
     ofxSubscribeOsc(7511, "/mixer/A/faders", mixing_val_A);
     ofxSubscribeOsc(7511, "/mixer/B/faders", mixing_val_B);
     
+    ofxSubscribeOsc(7511, "/display/fps", fps);
+    
+    //PUBLISH
+    ofxPublishOsc("localhost", 7510, "/display/A/ms_since_last_output", &msSinceLastOutput_A, false);
+    //ofxPublishOsc("localhost", 7510, "/display/B/ms_since_last_output", &msSinceLastOutput_B, false);
+    
     
     
 }
 //--------------------------------------------------------------
 void ofApp::update(){
+    ofSetFrameRate(fps);
     updateGui();
     
     //update parameters
@@ -87,28 +112,31 @@ void ofApp::update(){
     for(i = 0; i < LED_MATRIX_WIDTH; i++){
         for(j = 0; j < LED_MATRIX_HEIGHT; j++){
             totem_side_A.addTo(i, j, display_snn_raw.get(i,j), mixing_val_A[0]);
-            //totem_side_A.addTo(i, j, display_snn_output.get(i,j), mixing_val_A[1]);
-            //totem_side_A.addTo(i, j, display_glyph.get(i,j), mixing_val_A[2]);
+            totem_side_A.addTo(i, j, display_snn_output.get(i,j), mixing_val_A[1]);
+            totem_side_A.addTo(i, j, display_glyph.get(i,j), mixing_val_A[2]);
             totem_side_A.addTo(i, j, display_transition.get(i,j), mixing_val_A[3]);
         }
     }
     //populate totem B matrix
-    /*
+    
     for(i = 0; i < LED_MATRIX_WIDTH; i++){
         for(j = 0; j < LED_MATRIX_HEIGHT; j++){
             totem_side_B.addTo(i, j, display_snn_raw.get(i,j), mixing_val_B[0]);
-            //totem_side_B.addTo(i, j, display_snn_output.get(i,j), mixing_val_B[1]);
-            //totem_side_B.addTo(i, j, display_glyph.get(i,j), mixing_val_B[2]);
-            //totem_side_B.addTo(i, j, display_transition.get(i,j), mixing_val_B[3]);
+            totem_side_B.addTo(i, j, display_snn_output.get(i,j), mixing_val_B[1]);
+            totem_side_B.addTo(i, j, display_glyph.get(i,j), mixing_val_B[2]);
+            totem_side_B.addTo(i, j, display_transition.get(i,j), mixing_val_B[3]);
         }
     }
-     */
+    
+    
     
     //flush serial
     totem_side_A.flush();
-    //totem_side_B.flush();
+    totem_side_B.flush();
     
-   
+    //Serial watchdog
+    msSinceLastOutput_A = totem_side_A.check();
+    //msSinceLastOutput_B = totem_side_B.check();
     
 }
 
@@ -123,48 +151,41 @@ void ofApp::draw(){
     display_transition.drawOnDisplay(size_display, 0, 130, 10);
     totem_side_A.drawOnDisplay(size_display, 0, 170, 10);
     totem_side_B.drawOnDisplay(size_display, 0, 210, 10);
+   
     
 }
 
 //--------------------------------------------------------------
-void ofApp::initParams(){
+void ofApp::initSNN(){
     ConstParams::Number_Of_Neurons = set_number_of_neurons;
-    ConstParams::Number_Of_Inhibitory = set_number_of_neurons/set_inhibitory_number;
-    ConstParams::Number_Of_Connection = 20;
-    ConstParams::Network_Type = 6;
+    ConstParams::Inhibitory_Group_Size = set_inhibitory_group_size;
+    ConstParams::Number_Of_Inhibitory = ConstParams::Number_Of_Neurons/ConstParams::Inhibitory_Group_Size;
+    ConstParams::Number_Of_Connection = set_number_of_connections;
+    
+    ConstParams::Network_Type = set_network_type;
     ConstParams::Excitatory_Neuron_Type = set_excitatory_neuron_type;
     ConstParams::Inhibitory_Neuron_Type = set_inhibitory_neuron_type;
-    ConstParams::Input_Neuron_Size  = set_number_of_neurons/set_input_number;
-    ConstParams::Output_Neuron_Size = ConstParams::Number_Of_Neurons/5;
-    ConstParams::Output_Group_Size = ConstParams::Output_Group_Size;
-    ConstParams::Input_Group_Size  = ConstParams::Input_Group_Size;
-    ConstParams::Network_Type = set_network_type;
-    ConstParams::Number_Of_Connection = set_number_of_connection;
+    
+    ConstParams::Input_Group_Size  = set_input_group_size;
+    ConstParams::Output_Group_Size = set_output_group_size;
+    ConstParams::Input_Neuron_Size  = ConstParams::Number_Of_Neurons/ConstParams::Input_Group_Size;
+    ConstParams::Output_Neuron_Size = ConstParams::Number_Of_Neurons/ConstParams::Output_Group_Size;
+    ConstParams::Input_Neuron_Per_Group  = ConstParams::Input_Neuron_Size/ConstParams::Input_Group_Size;
+    ConstParams::Output_Neuron_Per_Group = ConstParams::Output_Neuron_Size/ConstParams::Output_Group_Size;
+    
+    spike_net.init();
 }
 
 //--------------------------------------------------------------
 void ofApp::setupGui(){
     gui.setup();
     gui.add(size_display.setup("Display size", 3, 1, 10));
-    gui.add(fps.setup("FPS", 30, 1, 300));
     gui.add(start_message.setup("press <space> to restart", ""));
-    gui.add(set_stp_flag.setup( "stp flag" , false));
-    gui.add(set_stdp_flag.setup( "stdp flag" , true));
-    gui.add(set_decay_rate.setup( "Decay rate (*10)" , 0.999995, 0.999, 1)); //it should be a double...
-    gui.add(set_number_of_neurons.setup( "Number of Neurons" , 3240, 0, 3240));
-    gui.add(set_network_type.setup( "Network type" , 3, 0, 3));
-    gui.add(network_types.setup("0:sparce 1:random 2:uniform 3:grid", ""));
-    gui.add(set_inhibitory_neuron_type.setup( "Inhibitory type" , 5, 1, 5));
-    gui.add(set_excitatory_neuron_type.setup( "Excitatory type" , 5, 1, 5));
-    gui.add(neuron_type.setup( "1:spiking_demo 2:resonator_demo 3:spiking 3:resonator 3:chattering", ""));
-    gui.add(set_inhibitory_number.setup( "Inhibitory portion" , 5, 1, 15));
-    gui.add(set_input_number.setup( "Input portion" , 5, 1, 15));
-    gui.add(set_number_of_connection.setup( "Number of connections" , 20, 1, 60));
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::updateGui(){
-    ofSetFrameRate(fps);
     ConstParams::Stp_Flag = set_stp_flag;
     ConstParams::Stdp_Flag = set_stdp_flag;
     ConstParams::Decay_Rate = double(set_decay_rate)/10 + 0.9;   //set_decay_rate should be double
@@ -178,10 +199,7 @@ void ofApp::setFrameRate(int & fps){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-    if(key == ' '){
-        initParams();
-        spike_net.init();
-    }
+   
 }
 
 //--------------------------------------------------------------

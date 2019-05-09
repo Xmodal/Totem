@@ -111,3 +111,15 @@ void LedMatrix::flush() {
 	serial.writeBytes(led_string, LED_MATRIX_N_LEDS + 1);
 }
 
+int LedMatrix::check() {
+    if(serial.available()){
+        while(serial.available()>0){
+            if(serial.readByte() == 255){
+                timeSinceLastOutput = serial.readByte();
+                //std::cout << this << " : time since last output : " << timeSinceLastOutput << " ms" << std::endl;
+                return timeSinceLastOutput;
+            }
+        }
+    }
+}
+

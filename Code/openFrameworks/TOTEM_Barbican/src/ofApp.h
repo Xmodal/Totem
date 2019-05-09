@@ -14,6 +14,7 @@
 #include "ofxGui.h"
 #include "ofxPubSubOsc.h"
 
+
 #include "Parameters.h"
 #include "SpikingNet.h"
 #include "SpikeNetWriter.h"
@@ -45,7 +46,7 @@ private:
     
     void setupGui();
     void updateGui();
-    void initParams();
+    void initSNN();
     
     int i, j, k;
     
@@ -53,6 +54,23 @@ private:
     SpikeNetWriter writer_weight, writer_spike;
     
     //raw snn variables
+    int set_number_of_neurons = ConstParams::Number_Of_Neurons;
+    int set_inhibitory_group_size = ConstParams::Inhibitory_Group_Size;
+    int set_number_of_connections = ConstParams::Number_Of_Connection;
+    
+    int set_network_type = ConstParams::Network_Type;
+    int set_excitatory_neuron_type = ConstParams::Excitatory_Neuron_Type;
+    int set_inhibitory_neuron_type = ConstParams::Inhibitory_Neuron_Type;
+    
+    int set_input_group_size = ConstParams::Input_Group_Size;
+    int set_output_group_size = ConstParams::Output_Group_Size;
+    
+    bool set_stp_flag = ConstParams::Stp_Flag;
+    bool set_stdp_flag = ConstParams::Stdp_Flag;
+    double set_decay_rate = ConstParams::Decay_Rate;
+
+    
+    
     int stimulation_val[10]; //dimension is ConstParams::Input_Group_Size
     int neuron_getV_offset = 0;
     
@@ -67,23 +85,17 @@ private:
     float mixing_val_A[4];
     float mixing_val_B[4];
     
+    //display variables
+    int fps = 30;
+    float msSinceLastOutput_A;
+    float msSinceLastOutput_B;
+    
+    
     
     ofxLabel start_message;
     ofxPanel gui;
-    ofxIntSlider fps;
+    
     ofxIntSlider size_display;
-    ofxToggle set_stp_flag;
-    ofxToggle set_stdp_flag;
-    ofxFloatSlider set_decay_rate; //it should be a double...
-    ofxIntSlider set_number_of_neurons;
-    ofxLabel network_types;
-    ofxIntSlider set_network_type;
-    ofxLabel neuron_type;
-    ofxIntSlider set_inhibitory_neuron_type;
-    ofxLabel excitatory_neuron_type;
-    ofxIntSlider set_excitatory_neuron_type;
-    ofxIntSlider set_inhibitory_number;
-    ofxIntSlider set_input_number;
-    ofxIntSlider set_number_of_connection;
+    
 
 };

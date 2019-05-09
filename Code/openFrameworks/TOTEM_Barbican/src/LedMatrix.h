@@ -25,6 +25,7 @@ public:
 
 	void clear();
 	void flush();
+    int check();
 
 private:
 
@@ -34,6 +35,7 @@ private:
 	unsigned char LedMatrix2D[LED_MATRIX_WIDTH][LED_MATRIX_HEIGHT];
 	unsigned char led_string[LED_MATRIX_N_LEDS + 1];
 	ofSerial serial;
+    int timeSinceLastOutput;
     
 };
 
