@@ -16,6 +16,7 @@ unsigned long timeSinceLastOutput = 0;
 void setup() {
   lastOutputTime = 0;
   Serial.begin(2500000);// baud rate 2500000
+  
 
   //setup led outputs, port numbers and order tested, from the pcb schematic
   FastLED.addLeds<APA102, 5, 6, BGR, DATA_RATE_MHZ(RATE)>(leds[2], ROWS);

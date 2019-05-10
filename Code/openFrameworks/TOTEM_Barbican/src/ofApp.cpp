@@ -4,12 +4,11 @@ LedMatrix display_snn_raw(0, "", false);
 LedMatrix display_snn_output(0, "", false);
 LedMatrix display_glyph(0, "", false);
 LedMatrix display_transition(0, "", false);
-//LedMatrix totem_side_A(2500000, "/dev/tty.usbmodem4621901", true);
-LedMatrix totem_side_A(2500000, "/dev/tty.usbmodem4072061", true);
+LedMatrix totem_side_A(2500000, "/dev/tty.usbmodem4621901", true);
+//LedMatrix totem_side_B(2500000, "/dev/tty.usbmodem4072061", true);
 //LedMatrix totem_side_A(2500000, "/dev/tty.usbmodem4075901", true);
 //LedMatrix totem_side_A(2500000, "/dev/tty.usbmodem4660021", true);
 
-LedMatrix totem_side_B(2500000, "", true);
 
 
 //--------------------------------------------------------------
@@ -34,7 +33,7 @@ void ofApp::setup(){
     display_snn_output.setup();
     display_glyph.setup();
     totem_side_A.setup();
-    totem_side_B.setup();
+    //totem_side_B.setup();
     
     //------
     //OSC
@@ -63,7 +62,7 @@ void ofApp::setup(){
         initSNN();
     });
     
-    ofxSubscribeOsc(7511, "/SNN_output/Output_Time_Window", Output_Time_Window);
+    ofxSubscribeOsc(7511, "/SNN_output/output_time_window", output_time_window);
     ofxSubscribeOsc(7511, "/SNN_output/spiked_scalar", spiked_scalar);
     
     ofxSubscribeOsc(7511, "/transition/global_value", global_value);
@@ -102,11 +101,11 @@ void ofApp::update(){
     osc_spiked_output.clear();
     osc_spiked_output.setAddress("/SNN_output/spiked_output");
     for(i=0;i<ConstParams::Output_Group_Size;i++){
-        spiked_output[i] = spike_net.getSpikedOutput(i)/(n*Output_Time_Window);
+        spiked_output[i] = spike_net.getSpikedOutput(i)/(n*output_time_window);
         osc_spiked_output.addFloatArg(spiked_output[i]);
     }
     osc_sender_msx.sendMessage(osc_spiked_output);
-    if(ofGetFrameNum()%Output_Time_Window == 0){
+    if(ofGetFrameNum()%output_time_window == 0){
         spike_net.clearSpikedNeuronId();
     }
     
@@ -118,11 +117,11 @@ void ofApp::update(){
     display_glyph.clear();
     display_transition.clear();
     totem_side_A.clear();
-    totem_side_B.clear();
+    //totem_side_B.clear();
     
     //populate raw SNN matrix
     for(i=0; i<ConstParams::Number_Of_Neurons; i++){
-        display_snn_raw.set(i%9, int(i/9), ofClamp(spike_net.neurons[i].getV()+neuron_getV_offset, 0, 254));
+        display_snn_raw.set(i%9, LED_MATRIX_HEIGHT - 1 - int(i/9), ofClamp(spike_net.neurons[i].getV()+neuron_getV_offset, 0, 254));
     }
     
     //populate SNN output matrix
@@ -148,6 +147,7 @@ void ofApp::update(){
     }
     
     //populate totem B matrix
+    /*
     for(i = 0; i < LED_MATRIX_WIDTH; i++){
         for(j = 0; j < LED_MATRIX_HEIGHT; j++){
             totem_side_B.addTo(i, j, display_snn_raw.get(i,j), mixing_val_B[0]);
@@ -156,6 +156,7 @@ void ofApp::update(){
             totem_side_B.addTo(i, j, display_transition.get(i,j), mixing_val_B[3]);
         }
     }
+     */
     
     
     //----------
@@ -164,7 +165,7 @@ void ofApp::update(){
     
     //flush serial
     totem_side_A.flush();
-    totem_side_B.flush();
+    //totem_side_B.flush();
     
     //Serial watchdog
     msSinceLastOutput_A = totem_side_A.check();
@@ -182,7 +183,7 @@ void ofApp::draw(){
     display_glyph.drawOnDisplay(size_display, 0, 90, 10);
     display_transition.drawOnDisplay(size_display, 0, 130, 10);
     totem_side_A.drawOnDisplay(size_display, 0, 170, 10);
-    totem_side_B.drawOnDisplay(size_display, 0, 210, 10);
+    //totem_side_B.drawOnDisplay(size_display, 0, 210, 10);
    
     
 }
