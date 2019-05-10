@@ -80,9 +80,9 @@ private:
     int neuron_getV_offset = 0;
     
     //output snn variables
-    int Output_Time_Window = 10;
+    int output_time_window = 10;
     float spiked_output[10];
-    float spiked_scalar = 25400;
+    float spiked_scalar = 400;
     
     //glyphs variables
     
