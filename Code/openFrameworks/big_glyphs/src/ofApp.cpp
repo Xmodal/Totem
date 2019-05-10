@@ -17,16 +17,25 @@ int subPreferredTranslation = TRANSLATION_MIDDLE;
 
 float subdivisionProbability = 0;
 
-void ofApp::setup() 
+int count = 0;
+
+void ofApp::setup()
 {
-	ofSetFrameRate(10);
+	ofSetFrameRate(3);
 	//Serial
 	led.setup();
 	//led.clear();
 	//led.flush();
 	row = 0;
 
-	currentGlyph = addGlyph();
+	shiftCount = 0;
+
+	for (int i = 0; i < 10; i++) {
+		onTotem[i] = addGlyph();
+
+		onTotem[i].shiftCount = (-36 * i);
+		std::cout << onTotem[i].shiftCount << std::endl;
+	}
 }
 
 void ofApp::update() 
@@ -46,7 +55,20 @@ void ofApp::update()
 		}
 	}*/
 
-	displayGlyph(currentGlyph, 0);
+
+	//if the glyph has shifted down the totem generate a new one in it's place
+	for (int i = 0; i < 10; i++) {
+		if (onTotem[i].shiftCount > 361) {
+			onTotem[i] = addGlyph();
+		}
+	}
+	
+	//itterate through the existing glyphs and shift their position down by 1
+	for (int i = 0; i < 10; i++) {
+		onTotem[i].shiftCount += 1;
+		if(onTotem[i].shiftCount > 0)
+			displayGlyph(onTotem[i], 0, onTotem[i].shiftCount);
+	}
 
 	led.flush();
 }
@@ -82,7 +104,7 @@ Glyph ofApp::addGlyph()
 	return Glyph(topFactory, subFactory, subdivisionProbability);
 }
 
-void ofApp::displayGlyph(const Glyph& glyph, int box)
+void ofApp::displayGlyph(const Glyph& glyph, int box, int baseRow)
 {
 	int row = box * LED_MATRIX_HEIGHT_PER_BOX;
 	for (int x = 0; x < GLYPH_WIDTH; x++)
@@ -90,7 +112,7 @@ void ofApp::displayGlyph(const Glyph& glyph, int box)
 		for (int y = 0; y < GLYPH_HEIGHT; y++)
 		{
 			bool isOn = glyph.get(x, y);
-			led.set(x, row + y, isOn ? 254 : 0);
+			led.set(x, row + y + baseRow, isOn ? 254 : 0);
 		}
 	}
 }

@@ -44,6 +44,8 @@ public:
 		return matrix[x][y];
 	}
 
+	int shiftCount = 0;
+
 	// The top-level blocks.
 	GlyphBlock topBlocks[N_TOP_BLOCKS];
 

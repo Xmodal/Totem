@@ -16,7 +16,7 @@ public:
 	void draw();
 
 	Glyph addGlyph();
-	void displayGlyph(const Glyph& glyph, int row);
+	void displayGlyph(const Glyph& glyph, int row, int baseRow);
 
 	void keyPressed(int key);
 	void keyReleased(int key);
@@ -32,5 +32,8 @@ public:
 
 	std::vector<Glyph> text;
 	int row;
+	int shiftCount = 0;
+	int glyphCount;
+	Glyph onTotem[10];
 	Glyph currentGlyph; 
 };
