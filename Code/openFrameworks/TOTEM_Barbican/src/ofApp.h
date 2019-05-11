@@ -15,11 +15,14 @@
 #include "ofxOsc.h"
 #include "ofxPubSubOsc.h"
 
-
 #include "Parameters.h"
 #include "SpikingNet.h"
 #include "SpikeNetWriter.h"
 #include "LedMatrix.h"
+
+#include "Glyph.h"
+#include "GlyphBlock.h"
+#include "GlyphBlockFactory.h"
 
 
 
@@ -45,10 +48,14 @@ public:
     
     ofxOscSender osc_sender_msx;
     ofxOscMessage osc_spiked_output;
+    
+    void displayOutputGroup(int group);
+    
+    Glyph addGlyph();
+    void displayGlyph(const Glyph& glyph, int row ,float alpha);
 
 private:
     
-    void setupGui();
     void updateGui();
     void initSNN();
     
@@ -81,10 +88,28 @@ private:
     
     //output snn variables
     int output_time_window = 10;
+    float output_group_value[10];
     float spiked_output[10];
     float spiked_scalar = 400;
+    float n = ConstParams::Output_Neuron_Size/ConstParams::Output_Group_Size;
     
     //glyphs variables
+    float glyph_alpha[10];
+    int glyph_trig_osc[10];
+    float glyph_trig_sensibility = 0.1;
+    int glyph_trig_done[10];
+    int row;
+    Glyph glyphs[10];
+    
+    int topPreferredType = TYPE_O;
+    int topPreferredRotation = ROTATION_0;
+    int topPreferredTranslation = TRANSLATION_MIDDLE;
+    
+    int subPreferredType = TYPE_O;
+    int subPreferredRotation = ROTATION_0;
+    int subPreferredTranslation = TRANSLATION_MIDDLE;
+    
+    float subdivisionProbability = 0;
     
     //transition variables
     int global_value = 0;
@@ -94,16 +119,14 @@ private:
     float mixing_val_B[4];
     
     //display variables
+    int display_size = 2;
     int fps = 30;
     float msSinceLastOutput_A;
     float msSinceLastOutput_B;
     
     
+
     
-    ofxLabel start_message;
-    ofxPanel gui;
-    
-    ofxIntSlider size_display;
     
 
 };

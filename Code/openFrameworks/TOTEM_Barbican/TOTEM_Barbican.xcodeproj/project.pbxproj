@@ -34,6 +34,10 @@
 		E84527EC6AD80C93CC56F8B5 /* NetworkingUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 42DABF476BEED3C5DCCBA8A7 /* NetworkingUtils.cpp */; };
 		ED0790217D4CA699A174D3E4 /* ofxPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A227D03DC18EA1402378E013 /* ofxPanel.cpp */; };
 		EDA59E89300F759609239594 /* SpikingNet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5144E6EA8AD00EF7C1268CBB /* SpikingNet.cpp */; };
+		FA13AF6C228710760005A671 /* GlyphBlock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA13AF68228710750005A671 /* GlyphBlock.cpp */; };
+		FA13AF6D228710760005A671 /* GlyphBlockFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA13AF69228710750005A671 /* GlyphBlockFactory.cpp */; };
+		FA13AF6E228710760005A671 /* Glyph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA13AF6A228710760005A671 /* Glyph.cpp */; };
+		FA13AF71228711FF0005A671 /* Matrix3x3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA13AF6F228711FE0005A671 /* Matrix3x3.cpp */; };
 		FBD5FEA658040BD333E8ACC6 /* IpEndpointName.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8AED9954CAC652BD531F2FA7 /* IpEndpointName.cpp */; };
 		FFA2B6FB612DACD6D61E8336 /* ofxGuiGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ADFC948379CAE4D076F9E466 /* ofxGuiGroup.cpp */; };
 /* End PBXBuildFile section */
@@ -308,6 +312,14 @@
 		EFDA30CF9965E8F76C1A042A /* ofxBaseGui.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxBaseGui.cpp; path = ../../../../../../../OpenFrameworks/of_v0.10.1_osx_release/addons/ofxGui/src/ofxBaseGui.cpp; sourceTree = SOURCE_ROOT; };
 		F18CB965FA64B61509AEF21A /* OscPrintReceivedElements.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = OscPrintReceivedElements.cpp; path = ../../../../../../../OpenFrameworks/of_v0.10.1_osx_release/addons/ofxOsc/libs/oscpack/src/osc/OscPrintReceivedElements.cpp; sourceTree = SOURCE_ROOT; };
 		F82D32592EDEE1F0ECF0E952 /* ofxToggle.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxToggle.cpp; path = ../../../../../../../OpenFrameworks/of_v0.10.1_osx_release/addons/ofxGui/src/ofxToggle.cpp; sourceTree = SOURCE_ROOT; };
+		FA13AF66228710750005A671 /* GlyphBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlyphBlock.h; sourceTree = "<group>"; };
+		FA13AF67228710750005A671 /* Glyph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Glyph.h; sourceTree = "<group>"; };
+		FA13AF68228710750005A671 /* GlyphBlock.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GlyphBlock.cpp; sourceTree = "<group>"; };
+		FA13AF69228710750005A671 /* GlyphBlockFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GlyphBlockFactory.cpp; sourceTree = "<group>"; };
+		FA13AF6A228710760005A671 /* Glyph.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Glyph.cpp; sourceTree = "<group>"; };
+		FA13AF6B228710760005A671 /* GlyphBlockFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlyphBlockFactory.h; sourceTree = "<group>"; };
+		FA13AF6F228711FE0005A671 /* Matrix3x3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Matrix3x3.cpp; sourceTree = "<group>"; };
+		FA13AF70228711FE0005A671 /* Matrix3x3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Matrix3x3.h; sourceTree = "<group>"; };
 		FABA66872277C36F00111E05 /* DefsLedMatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DefsLedMatrix.h; sourceTree = "<group>"; };
 		FFCA3551BF7EEAF8C31DAD75 /* ofxPubSubOscSettings.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxPubSubOscSettings.h; path = ../../../../../../../OpenFrameworks/of_v0.10.1_osx_release/addons/ofxPubSubOsc/src/details/ofxPubSubOscSettings.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -799,10 +811,18 @@
 		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				FABA66872277C36F00111E05 /* DefsLedMatrix.h */,
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
 				E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */,
 				E4B69E1F0A3A1BDC003C02F2 /* ofApp.h */,
+				FA13AF6F228711FE0005A671 /* Matrix3x3.cpp */,
+				FA13AF70228711FE0005A671 /* Matrix3x3.h */,
+				FA13AF6A228710760005A671 /* Glyph.cpp */,
+				FA13AF67228710750005A671 /* Glyph.h */,
+				FA13AF68228710750005A671 /* GlyphBlock.cpp */,
+				FA13AF66228710750005A671 /* GlyphBlock.h */,
+				FA13AF69228710750005A671 /* GlyphBlockFactory.cpp */,
+				FA13AF6B228710760005A671 /* GlyphBlockFactory.h */,
+				FABA66872277C36F00111E05 /* DefsLedMatrix.h */,
 				5F92FDC713A59819217B9C01 /* Izhikevich.cpp */,
 				EF967F05B282BD3DB4AD2103 /* Izhikevich.h */,
 				647EB4A6374856C055A97CA0 /* LedMatrix.cpp */,
@@ -954,6 +974,8 @@
 				ED0790217D4CA699A174D3E4 /* ofxPanel.cpp in Sources */,
 				5AE090B7762BD0D956BFD173 /* ofxSlider.cpp in Sources */,
 				6960669A1D28948C19A8B557 /* ofxSliderGroup.cpp in Sources */,
+				FA13AF6C228710760005A671 /* GlyphBlock.cpp in Sources */,
+				FA13AF6D228710760005A671 /* GlyphBlockFactory.cpp in Sources */,
 				38FAA40DBC255F60E358BF87 /* ofxToggle.cpp in Sources */,
 				FBD5FEA658040BD333E8ACC6 /* IpEndpointName.cpp in Sources */,
 				E84527EC6AD80C93CC56F8B5 /* NetworkingUtils.cpp in Sources */,
@@ -962,10 +984,12 @@
 				DBA5DADDDF274B0EDDE6E2C5 /* OscPrintReceivedElements.cpp in Sources */,
 				4DA5E2449C74DC3D923A4AE7 /* OscReceivedElements.cpp in Sources */,
 				8E867B92568D740C250591C2 /* OscTypes.cpp in Sources */,
+				FA13AF71228711FF0005A671 /* Matrix3x3.cpp in Sources */,
 				0E7E81519B30AA8A1F1F3CDD /* ofxOscBundle.cpp in Sources */,
 				D1903836614F982D01F23729 /* ofxOscMessage.cpp in Sources */,
 				3796C0FB67AE8D7E87B0C8B6 /* ofxOscParameterSync.cpp in Sources */,
 				20B890A3C7270C529759870D /* ofxOscReceiver.cpp in Sources */,
+				FA13AF6E228710760005A671 /* Glyph.cpp in Sources */,
 				59C9126A0361CCCDAF913979 /* ofxOscSender.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

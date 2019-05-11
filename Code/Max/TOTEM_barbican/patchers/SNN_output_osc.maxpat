@@ -103,7 +103,7 @@
 					"presentation" : 1,
 					"presentation_rect" : [ 60.0, 54.401001, 112.0, 17.0 ],
 					"style" : "",
-					"text" : "/spiked_scalar",
+					"text" : "spiked_scalar",
 					"textcolor" : [ 0.862745, 0.870588, 0.878431, 1.0 ]
 				}
 
@@ -599,8 +599,8 @@
 			}
  ],
 		"parameters" : 		{
-			"obj-13" : [ "gatepct[1]", "gatepct", 0 ],
 			"obj-95" : [ "gatepct[18]", "gatepct", 0 ],
+			"obj-13" : [ "gatepct[1]", "gatepct", 0 ],
 			"obj-39" : [ "gatepct[3]", "gatepct", 0 ]
 		}
 ,

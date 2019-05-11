@@ -5,7 +5,7 @@ LedMatrix display_snn_output(0, "", false);
 LedMatrix display_glyph(0, "", false);
 LedMatrix display_transition(0, "", false);
 LedMatrix totem_side_A(2500000, "/dev/tty.usbmodem4621901", true);
-//LedMatrix totem_side_B(2500000, "/dev/tty.usbmodem4072061", true);
+LedMatrix totem_side_B(2500000, "/dev/tty.usbmodem4072061", true);
 //LedMatrix totem_side_A(2500000, "/dev/tty.usbmodem4075901", true);
 //LedMatrix totem_side_A(2500000, "/dev/tty.usbmodem4660021", true);
 
@@ -17,11 +17,10 @@ void ofApp::setup(){
     ofSetBackgroundAuto(true);
     ofSetVerticalSync(false);
     ofSetFrameRate(30);
-    ofBackground(10);
+    ofBackground(100);
     
     std::cout.precision(11);
     
-    setupGui();
     
     //Re-initialisation of spike net in the keyPress function
     spike_net.init(); //just to make sure there is no issue
@@ -33,7 +32,7 @@ void ofApp::setup(){
     display_snn_output.setup();
     display_glyph.setup();
     totem_side_A.setup();
-    //totem_side_B.setup();
+    totem_side_B.setup();
     
     //------
     //OSC
@@ -62,6 +61,16 @@ void ofApp::setup(){
         initSNN();
     });
     
+    ofxSubscribeOsc(7511, "/glyph/glyph_alpha", glyph_alpha);
+    ofxSubscribeOsc(7511, "/glyph/glyph_trig_sensibility", glyph_trig_sensibility);
+    ofxSubscribeOsc(7511, "/glyph/glyph_trig", glyph_trig_osc, [this](){
+        for(int i = 0; i < 10; i++){
+            if(glyph_trig_osc[i]){ glyphs[i] = addGlyph();}
+        }
+
+    });
+    
+    
     ofxSubscribeOsc(7511, "/SNN_output/output_time_window", output_time_window);
     ofxSubscribeOsc(7511, "/SNN_output/spiked_scalar", spiked_scalar);
     
@@ -71,19 +80,27 @@ void ofApp::setup(){
     ofxSubscribeOsc(7511, "/mixer/B/faders", mixing_val_B);
     
     ofxSubscribeOsc(7511, "/display/fps", fps);
+    ofxSubscribeOsc(7511, "/display/display_size", display_size);
     
     //PUBLISH
     //ofxPublishOsc("localhost", 7510, "/display/A/ms_since_last_output", &msSinceLastOutput_A, false);
     //ofxPublishOsc("localhost", 7510, "/display/B/ms_since_last_output", &msSinceLastOutput_B, false);
 //    ofxPublishOsc("localhost", 7510, "/SNN_output/spiked_output", &spiked_output[], false); // not working with osfPublishAsArray
     
+    ofSleepMillis(5000);
     
+    //------
+    //GLYPHS
+    //------
+    row = 0;
+    for(int i = 0; i < 10; i++){
+        glyphs[i] = addGlyph();
+    }
     
 }
 //--------------------------------------------------------------
 void ofApp::update(){
     ofSetFrameRate(fps);
-    updateGui();
     
     //----------
     //update parameters
@@ -94,20 +111,41 @@ void ofApp::update(){
     //----------
     //update processes
     //----------
+    
+    //UPDATE SNN
     spike_net.update();
     
+    //UPDATE SNN OUTPUT
+    
     //get firing rates
-    float n = ConstParams::Output_Neuron_Size/ConstParams::Output_Group_Size;
-    osc_spiked_output.clear();
-    osc_spiked_output.setAddress("/SNN_output/spiked_output");
     for(i=0;i<ConstParams::Output_Group_Size;i++){
-        spiked_output[i] = spike_net.getSpikedOutput(i)/(n*output_time_window);
-        osc_spiked_output.addFloatArg(spiked_output[i]);
+        spiked_output[i]= spike_net.getSpikedOutput(i)/(n*output_time_window);
+        output_group_value[i] = ofClamp(spiked_output[i]*spiked_scalar, 0, 254);
     }
-    osc_sender_msx.sendMessage(osc_spiked_output);
     if(ofGetFrameNum()%output_time_window == 0){
         spike_net.clearSpikedNeuronId();
     }
+    
+    osc_spiked_output.clear();
+    osc_spiked_output.setAddress("/SNN_output/spiked_output");
+    for(i=0;i<ConstParams::Output_Group_Size;i++){
+        osc_spiked_output.addFloatArg(spiked_output[i]);
+    }
+    osc_sender_msx.sendMessage(osc_spiked_output);
+    
+    
+    //UPDATE GLYPHS
+    for(int i = 0; i < ConstParams::Output_Group_Size; i++){
+        //glyph_alpha[i] = ofClamp(spiked_output[i]*spiked_scalar, 0, 254);
+        
+        if(spiked_output[i] < glyph_trig_sensibility){glyph_trig_done[i] = 0;}
+        else if(spiked_output[i] > glyph_trig_sensibility && glyph_trig_done[i] == 0){
+            glyphs[i] = addGlyph();
+            glyph_trig_done[i] = 1;
+        }
+        
+    }
+    
     
     //----------
     //update displays
@@ -117,7 +155,7 @@ void ofApp::update(){
     display_glyph.clear();
     display_transition.clear();
     totem_side_A.clear();
-    //totem_side_B.clear();
+    totem_side_B.clear();
     
     //populate raw SNN matrix
     for(i=0; i<ConstParams::Number_Of_Neurons; i++){
@@ -125,18 +163,48 @@ void ofApp::update(){
     }
     
     //populate SNN output matrix
+    /*
     for(i=0; i<ConstParams::Number_Of_Neurons; i++){
-        display_snn_output.set(i%9, int(i/9), ofClamp(spiked_scalar*spiked_output[int(i/324)], 0, 254));
+        display_snn_output.set(i%9, LED_MATRIX_HEIGHT - 1 - int(i/10), ofClamp(spiked_scalar*spiked_output[int(i/360)], 0, 254));
     }
+    */
+    
+    
+    for(k = 0; k < ConstParams::Output_Group_Size; k++){
+        for (i = 0; i < LED_MATRIX_WIDTH; i++)
+        {
+            for (int j = 0; j < LED_MATRIX_HEIGHT_PER_BOX; j++)
+            {
+                display_snn_output.set(i, 360 - 1 - (k * LED_MATRIX_HEIGHT_PER_BOX + j), output_group_value[k]);
+            }
+        }
+    }
+     
     
     //populate glyph matrix
     
+    
+    /*
+    for(i=0; i<LED_MATRIX_WIDTH; i++){
+        for(j=0; j<LED_MATRIX_HEIGHT; j++){
+            display_glyph.set(i, j, j%36 == 0 ? 255 : 0);
+        }
+    }
+    */
+    
+    for(int i = 0; i < 10; i++){
+        displayGlyph(glyphs[i], 9 - i, glyph_alpha[i]);
+    }
+    
+    
     //populate transition matrix
     for(i=0; i<ConstParams::Number_Of_Neurons; i++){
-        display_transition.set(i%9, int(i/9), global_value);
+        //display_transition.set(i%9, int(i/9), global_value);
+        display_transition.set(i%9, int(i/9), ofRandom(1)*254);
     }
     
     //populate totem A matrix
+    
     for(i = 0; i < LED_MATRIX_WIDTH; i++){
         for(j = 0; j < LED_MATRIX_HEIGHT; j++){
             totem_side_A.addTo(i, j, display_snn_raw.get(i,j), mixing_val_A[0]);
@@ -146,8 +214,9 @@ void ofApp::update(){
         }
     }
     
+    
     //populate totem B matrix
-    /*
+    
     for(i = 0; i < LED_MATRIX_WIDTH; i++){
         for(j = 0; j < LED_MATRIX_HEIGHT; j++){
             totem_side_B.addTo(i, j, display_snn_raw.get(i,j), mixing_val_B[0]);
@@ -156,7 +225,7 @@ void ofApp::update(){
             totem_side_B.addTo(i, j, display_transition.get(i,j), mixing_val_B[3]);
         }
     }
-     */
+    
     
     
     //----------
@@ -165,27 +234,30 @@ void ofApp::update(){
     
     //flush serial
     totem_side_A.flush();
-    //totem_side_B.flush();
+    totem_side_B.flush();
     
     //Serial watchdog
-    msSinceLastOutput_A = totem_side_A.check();
+    //msSinceLastOutput_A = totem_side_A.check();
     //msSinceLastOutput_B = totem_side_B.check();
     
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    gui.draw();
+    ofClear(100);
+    ofDrawBitmapString("frame rate: "+ofToString(ofGetFrameRate(), 2), 220,20);
+    
     
     //draw displays
-    display_snn_raw.drawOnDisplay(size_display, 0, 10, 10);
-    display_snn_output.drawOnDisplay(size_display, 0, 50, 10);
-    display_glyph.drawOnDisplay(size_display, 0, 90, 10);
-    display_transition.drawOnDisplay(size_display, 0, 130, 10);
-    totem_side_A.drawOnDisplay(size_display, 0, 170, 10);
-    //totem_side_B.drawOnDisplay(size_display, 0, 210, 10);
+    display_snn_raw.drawOnDisplay(display_size, 0, 10, 10);
+    display_snn_output.drawOnDisplay(display_size, 0, 40, 10);
+    display_glyph.drawOnDisplay(display_size, 0, 70, 10);
+    display_transition.drawOnDisplay(display_size, 0, 100, 10);
+    totem_side_A.drawOnDisplay(display_size, 0, 150, 10);
+    totem_side_B.drawOnDisplay(display_size, 0, 180, 10);
    
-    
+    //for(i=10; i>0;i--){ofDrawBitmapString(ofToString(output_group_value[i]), 200,i*80);}
+
 }
 
 //--------------------------------------------------------------
@@ -212,19 +284,41 @@ void ofApp::initSNN(){
 }
 
 //--------------------------------------------------------------
-void ofApp::setupGui(){
-    gui.setup();
-    gui.add(size_display.setup("Display size", 3, 1, 10));
-    gui.add(start_message.setup("press <space> to restart", ""));
+Glyph ofApp::addGlyph()
+{
+    float topTypeWeights[N_TYPES];
+    float topRotationWeights[N_ROTATIONS];
+    float topTranslationWeights[N_TRANSLATIONS];
+    GlyphBlockFactory::generateSmoothWeights(topTypeWeights, ofMap(topPreferredType, 0, MAX_TYPE, 0, 1), N_TYPES, false);
+    GlyphBlockFactory::generateSmoothWeights(topRotationWeights, ofMap(topPreferredRotation, 0, MAX_ROTATION, 0, 1), N_ROTATIONS, true);
+    GlyphBlockFactory::generateSmoothWeights(topTranslationWeights, ofMap(topPreferredTranslation, 0, MAX_TRANSLATION, 0, 1), N_TRANSLATIONS, false);
     
+    float subTypeWeights[N_TYPES];
+    float subRotationWeights[N_ROTATIONS];
+    float subTranslationWeights[N_TRANSLATIONS];
+    GlyphBlockFactory::generateSmoothWeights(subTypeWeights, ofMap(subPreferredType, 0, MAX_TYPE, 0, 1), N_TYPES, false);
+    GlyphBlockFactory::generateSmoothWeights(subRotationWeights, ofMap(subPreferredRotation, 0, MAX_ROTATION, 0, 1), N_ROTATIONS, true);
+    GlyphBlockFactory::generateSmoothWeights(subTranslationWeights, ofMap(subPreferredTranslation, 0, MAX_TRANSLATION, 0, 1), N_TRANSLATIONS, false);
+    
+    GlyphBlockFactory topFactory(topTypeWeights, topRotationWeights, topTranslationWeights);
+    GlyphBlockFactory subFactory(subTypeWeights, subRotationWeights, subTranslationWeights);
+    
+    // Create glyph.
+    return Glyph(topFactory, subFactory, subdivisionProbability);
 }
 
+
 //--------------------------------------------------------------
-void ofApp::updateGui(){
-    ConstParams::Stp_Flag = set_stp_flag;
-    ConstParams::Stdp_Flag = set_stdp_flag;
-    ConstParams::Decay_Rate = double(set_decay_rate)/10 + 0.9;   //set_decay_rate should be double
-    //std::cout << ConstParams::Decay_Rate << std::endl;
+void ofApp::displayGlyph(const Glyph& glyph, int box, float alpha){
+    int row = box * LED_MATRIX_HEIGHT_PER_BOX;
+    for (int x = 0; x < GLYPH_WIDTH; x++)
+    {
+        for (int y = 0; y < GLYPH_HEIGHT; y++)
+        {
+            bool isOn = glyph.get(x, y);
+            display_glyph.set(x, row + y, isOn ? (254*alpha) : 0);
+        }
+    }
 }
 
 //--------------------------------------------------------------
@@ -234,7 +328,49 @@ void ofApp::setFrameRate(int & fps){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-   
+    std::cout << (char)key << std::endl;
+    switch (key) {
+            
+        case 'I': topPreferredType = TYPE_I; break;
+        case 'L': topPreferredType = TYPE_L; break;
+        case 'T': topPreferredType = TYPE_T; break;
+        case 'U': topPreferredType = TYPE_U; break;
+        case 'O': topPreferredType = TYPE_O; break;
+        case 'X': topPreferredType = TYPE_X; break;
+            
+        case 'i': subPreferredType = TYPE_I; break;
+        case 'l': subPreferredType = TYPE_L; break;
+        case 't': subPreferredType = TYPE_T; break;
+        case 'u': subPreferredType = TYPE_U; break;
+        case 'o': subPreferredType = TYPE_O; break;
+        case 'x': subPreferredType = TYPE_X; break;
+            
+        case 'S': topPreferredRotation = ROTATION_0; break;
+        case 'D': topPreferredRotation = ROTATION_90; break;
+        case 'F': topPreferredRotation = ROTATION_180; break;
+        case 'G': topPreferredRotation = ROTATION_270; break;
+            
+        case 's': subPreferredRotation = ROTATION_0; break;
+        case 'd': subPreferredRotation = ROTATION_90; break;
+        case 'f': subPreferredRotation = ROTATION_180; break;
+        case 'g': subPreferredRotation = ROTATION_270; break;
+            
+        case 'Q': topPreferredTranslation = TRANSLATION_TOP; break;
+        case 'A': topPreferredTranslation = TRANSLATION_MIDDLE; break;
+        case 'Z': topPreferredTranslation = TRANSLATION_BOTTOM; break;
+            
+        case 'q': subPreferredTranslation = TRANSLATION_TOP; break;
+        case 'a': subPreferredTranslation = TRANSLATION_MIDDLE; break;
+        case 'z': subPreferredTranslation = TRANSLATION_BOTTOM; break;
+            
+        case '+': subdivisionProbability = ofClamp(subdivisionProbability + 0.05, 0, 1); break;
+        case '-': subdivisionProbability = ofClamp(subdivisionProbability - 0.05, 0, 1); break;
+    }
+    
+    // Add glyph after any keypress.
+    for(int i = 0; i < 10; i++){
+        glyphs[i] = addGlyph();
+    }
 }
 
 //--------------------------------------------------------------

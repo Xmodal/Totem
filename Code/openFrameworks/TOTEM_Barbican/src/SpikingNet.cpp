@@ -141,7 +141,7 @@ void SpikingNet::setInputNeurons(){
     for(int i=0; i<ConstParams::Input_Group_Size; i++){
         std::cout << " new input group : " << std::endl;
         for(int j=0; j<ConstParams::Input_Neuron_Per_Group; ++j){
-            input_neurons[i* ConstParams::Input_Neuron_Per_Group + j] = Number_Of_Inhibitory + i*36*9 + j; //each box (36*9neurons) starts with an input group
+            input_neurons[i* ConstParams::Input_Neuron_Per_Group + j] = Number_Of_Inhibitory + i*36*9 + (36*9/2 - ConstParams::Input_Neuron_Per_Group/2) + j; //each box (36*9neurons) starts with an input group
             
             std::cout << input_neurons[i* ConstParams::Input_Neuron_Per_Group + j] << ",";
         }
@@ -166,7 +166,7 @@ void SpikingNet::setOutputNeurons(){
     for(int i=0; i<ConstParams::Output_Group_Size; i++){
         std::cout << " new output group : " << std::endl;
         for(int j=0; j<ConstParams::Output_Neuron_Per_Group; ++j){
-            output_neurons[i* ConstParams::Output_Neuron_Per_Group + j] = i*36*9 + 36*9/2 + j; //each box (36*9neurons) starts with an input group & and the portion of inhibitory at the top of the network has to be taken into account to have a propoer positioning//each box (36*9neurons) has an output group in the middle
+            output_neurons[i* ConstParams::Output_Neuron_Per_Group + j] = i*36*9 + j; //each box (36*9neurons) starts with an input group & and the portion of inhibitory at the top of the network has to be taken into account to have a propoer positioning//each box (36*9neurons) has an output group in the middle
             std::cout << output_neurons[i*ConstParams::Output_Neuron_Per_Group+j] << ",";
         }
         std::cout << std::endl;
