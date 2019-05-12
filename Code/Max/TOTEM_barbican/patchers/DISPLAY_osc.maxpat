@@ -1388,18 +1388,18 @@
 			}
  ],
 		"parameters" : 		{
-			"obj-19" : [ "gatepct[5]", "gatepct", 0 ],
-			"obj-95" : [ "gatepct[18]", "gatepct", 0 ],
-			"obj-40" : [ "gatepct[10]", "gatepct", 0 ],
-			"obj-23" : [ "gatepct[8]", "gatepct", 0 ],
-			"obj-73" : [ "BLACKOUT", "Mute all", 0 ],
-			"obj-29" : [ "gatepct[9]", "gatepct", 0 ],
 			"obj-21" : [ "gatepct[7]", "gatepct", 0 ],
-			"obj-4" : [ "gatepct[1]", "gatepct", 0 ],
+			"obj-12" : [ "gatepct[4]", "gatepct", 0 ],
+			"obj-19" : [ "gatepct[5]", "gatepct", 0 ],
 			"obj-11" : [ "gatepct[3]", "gatepct", 0 ],
 			"obj-20" : [ "gatepct[6]", "gatepct", 0 ],
+			"obj-73" : [ "BLACKOUT", "Mute all", 0 ],
+			"obj-4" : [ "gatepct[1]", "gatepct", 0 ],
+			"obj-29" : [ "gatepct[9]", "gatepct", 0 ],
 			"obj-10" : [ "gatepct[2]", "gatepct", 0 ],
-			"obj-12" : [ "gatepct[4]", "gatepct", 0 ]
+			"obj-95" : [ "gatepct[18]", "gatepct", 0 ],
+			"obj-23" : [ "gatepct[8]", "gatepct", 0 ],
+			"obj-40" : [ "gatepct[10]", "gatepct", 0 ]
 		}
 ,
 		"dependency_cache" : [  ],

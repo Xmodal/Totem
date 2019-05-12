@@ -85,6 +85,7 @@ private:
 
     int stimulation_val[10]; //dimension is ConstParams::Input_Group_Size
     int neuron_getV_offset = 0;
+    int whole_stimulation_val = 0;
     
     //output snn variables
     int output_time_window = 10;

@@ -2,7 +2,7 @@
 	"name" : "TOTEM_barbican",
 	"version" : 1,
 	"creationdate" : -654727295,
-	"modificationdate" : -654519667,
+	"modificationdate" : -654453783,
 	"viewrect" : [ 0.0, 45.0, 300.0, 500.0 ],
 	"autoorganize" : 1,
 	"hideprojectwindow" : 0,
@@ -14,11 +14,6 @@
 				"kind" : "patcher",
 				"local" : 1,
 				"toplevel" : 1
-			}
-,
-			"RAMPING.maxpat" : 			{
-				"kind" : "patcher",
-				"local" : 1
 			}
 ,
 			"DISPLAY_osc.maxpat" : 			{
@@ -46,6 +41,11 @@
 				"local" : 1
 			}
 ,
+			"STATES.maxpat" : 			{
+				"kind" : "patcher",
+				"local" : 1
+			}
+,
 			"GLYPH_osc.maxpat" : 			{
 				"kind" : "patcher",
 				"local" : 1
@@ -56,7 +56,12 @@
 				"local" : 1
 			}
 ,
-			"STATES.maxpat" : 			{
+			"RAMPING.maxpat" : 			{
+				"kind" : "patcher",
+				"local" : 1
+			}
+,
+			"SOUND.maxpat" : 			{
 				"kind" : "patcher",
 				"local" : 1
 			}

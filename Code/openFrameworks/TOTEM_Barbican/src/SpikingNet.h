@@ -80,6 +80,8 @@ public:
     void stimulation(int group_id_, double stim_strength_);
     void wholeStimulation();
     void wholeStimulation(double stim_strength_);
+    void wholeNetworkStimulation();
+    void wholeNetworkStimulation(double stim_strength_);
     void checkTask();
     void clearSpikedNeuronId();
     int  getSpikedOutput(int index);

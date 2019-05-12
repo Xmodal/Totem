@@ -694,6 +694,20 @@ void SpikingNet::wholeStimulation(double stim_strengh_){
     }
 }
 
+void SpikingNet::wholeNetworkStimulation(){
+    //    external input
+    for(int i=0; i<ConstParams::Number_Of_Neurons; ++i){
+        neurons[i].addToI(ConstParams::Stim_Strength);
+    }
+}
+
+void SpikingNet::wholeNetworkStimulation(double stim_strengh_){
+    //    external input
+    for(int i=0; i<ConstParams::Number_Of_Neurons; ++i){
+            neurons[i].addToI(stim_strengh_);
+    }
+}
+
 bool SpikingNet::any(int target, const int *reference, int reference_size){
     bool answer = false;
     for(int i=0; i<reference_size; ++i){

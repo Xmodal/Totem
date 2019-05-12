@@ -42,6 +42,7 @@ void ofApp::setup(){
     
     //SUSCRIBE
     ofxSubscribeOsc(7511, "/SNN/stimulation", stimulation_val);
+    ofxSubscribeOsc(7511, "/SNN/whole_stimulation", whole_stimulation_val);
     
     ofxSubscribeOsc(7511, "/SNN/neuron_getV_offset", neuron_getV_offset);
     ofxSubscribeOsc(7511, "/SNN/number_of_neurons", set_number_of_neurons);
@@ -107,6 +108,9 @@ void ofApp::update(){
     //----------
     for(i=0; i < ConstParams::Input_Group_Size; i++){
         spike_net.stimulation(i, stimulation_val[i]); // (input group id, stimlation strength)
+    }
+    if(whole_stimulation_val != 0){
+        spike_net.wholeNetworkStimulation(whole_stimulation_val);
     }
     //----------
     //update processes
