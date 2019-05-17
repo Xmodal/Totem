@@ -15,7 +15,9 @@ public:
 	GlyphBlock create() const;
 
 	static int weightedRandom(const float* weights, int nWeights);
-	static void generateSmoothWeights(float* weights, float proportion, int nWeights, bool wrapAround);
+	static void generateSmoothWeights(float* weights, float proportion, int nWeights, bool wrapAround,
+		                                float peakProbability=0.5, float peakNeighborsProbability=0.3, float defaultProbability=0.2);
+	static float random01();
 
 	float typeWeights[N_TYPES];
 	float rotationWeights[N_ROTATIONS];

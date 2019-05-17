@@ -15,7 +15,7 @@ GlyphBlock GlyphBlockFactory::create() const {
 	GlyphRotation rotation = (GlyphRotation)weightedRandom(rotationWeights, N_ROTATIONS);
 	GlyphTranslation translation = (GlyphTranslation)weightedRandom(translationWeights, N_TRANSLATIONS);
 	// Create block.
-	return GlyphBlock(type, rotation, translation);
+	return GlyphBlock(type, rotation, translation, random01());
 }
 
 int GlyphBlockFactory::weightedRandom(const float* weights, int nWeights) {
@@ -24,7 +24,7 @@ int GlyphBlockFactory::weightedRandom(const float* weights, int nWeights) {
 	for (int i = 0; i < nWeights; i++)
 		sum += weights[i];
 	// Pick random value.
-	float rnd = (rand() * sum) / RAND_MAX;
+	float rnd = random01() * sum;
 	// Find index.
 	for (int i = 0; i < nWeights; i++)
 	{
@@ -35,22 +35,45 @@ int GlyphBlockFactory::weightedRandom(const float* weights, int nWeights) {
 	return (nWeights - 1);
 }
 
-void GlyphBlockFactory::generateSmoothWeights(float* weights, float proportion, int nWeights, bool wrapAround)
+void GlyphBlockFactory::generateSmoothWeights(float* weights, float proportion, int nWeights, bool wrapAround,
+																							float peakProbability, float peakNeighborsProbability, float defaultProbability)
 {
-	for (int i = 0; i < nWeights; i++)
-		weights[i] = 0.1f;
+	// Determine n. neighbors and default weights.
+	int nNeighbors = (nWeights >= 3 ? 2 : nWeights-1);
+	int nDefault   = nWeights - nNeighbors - 1;
+	if (nDefault < 0)
+		nDefault = 0;
+	else {
+		defaultProbability /= nDefault;
+		// Just set everything to default at first.
+		for (int i=0; i<nWeights; i++)
+			weights[i] = defaultProbability;
+	}
+
+	// Split neighbors probability.
+	peakNeighborsProbability /= nNeighbors;
+
+	// Set max weight.
 	int maxIndex = int(proportion * nWeights);
-	weights[maxIndex] = 1.0f;
+    if (maxIndex < 0)
+        maxIndex = 0;
+    if (maxIndex >= nWeights)
+        maxIndex = nWeights-1;
+	weights[maxIndex] = peakProbability;
 	if (wrapAround)
 	{
-		weights[(maxIndex - 1 + nWeights) % nWeights] = 0.25f;
-		weights[(maxIndex + 1) % nWeights] = 0.25f;
+		weights[(maxIndex - 1 + nWeights) % nWeights] = peakNeighborsProbability;
+		weights[(maxIndex + 1) % nWeights] = peakNeighborsProbability;
 	}
 	else
 	{
 		if (maxIndex > 0)
-			weights[maxIndex - 1] = 0.25f;
+			weights[maxIndex - 1] = peakNeighborsProbability;
 		if (maxIndex < nWeights - 1)
-			weights[maxIndex + 1] = 0.25f;
+			weights[maxIndex + 1] = peakNeighborsProbability;
 	}
+}
+
+float GlyphBlockFactory::random01() {
+	return float(rand()) / RAND_MAX;
 }

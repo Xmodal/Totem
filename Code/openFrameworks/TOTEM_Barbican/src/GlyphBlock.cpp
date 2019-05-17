@@ -1,10 +1,11 @@
 #include "GlyphBlock.h"
 
 GlyphBlock::GlyphBlock() {
-	GlyphBlock::GlyphBlock(TYPE_VOID, ROTATION_0, TRANSLATION_MIDDLE);
+	GlyphBlock(TYPE_VOID, ROTATION_0, TRANSLATION_MIDDLE);
 }
 
-GlyphBlock::GlyphBlock(GlyphType type, GlyphRotation rotation, GlyphTranslation translation)
+GlyphBlock::GlyphBlock(GlyphType type, GlyphRotation rotation, GlyphTranslation translation, float activation_)
+	: activation(activation_)
 {
 	// Get base block.
 	matrix = createBase(type);
@@ -17,9 +18,10 @@ GlyphBlock::GlyphBlock(GlyphType type, GlyphRotation rotation, GlyphTranslation 
 		matrix = rotate90(matrix);
 }
 
-GlyphBlock::GlyphBlock(bool left, bool top, bool right, bool bottom) {
-	matrix = Matrix3x3( 
-		false, top, false, 
+GlyphBlock::GlyphBlock(bool left, bool top, bool right, bool bottom)
+ 	: activation(0) {
+	matrix = Matrix3x3(
+		false, top, false,
 		left, true, right,
 		false, bottom, false
 	);
@@ -160,4 +162,12 @@ Matrix3x3 GlyphBlock::rotate90(const Matrix3x3& m) const
 	  m[2][1], m[1][1], m[0][1],
 	  m[2][2], m[1][2], m[0][2]
 	);
+}
+#include <iostream>
+void GlyphBlock::debug() {
+	for (int y=0; y<3; y++) {
+		for (int x=0; x<3; x++)
+			std::cout << matrix[y][x] << " ";
+		std::cout << std::endl;
+	}
 }

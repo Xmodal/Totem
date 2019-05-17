@@ -1,12 +1,26 @@
 #include "Glyph.h"
 #include <iostream>
 
-Glyph::Glyph(const GlyphBlockFactory& topFactory, const GlyphBlockFactory& subFactory, float subdivisionProbability)
+Glyph::Glyph(const GlyphBlockFactory& topFactory, const GlyphBlockFactory& subFactory)
 {
 	// Create top-level blocks.
-	for (int i = 0; i < N_TOP_BLOCKS; i++)
+	for (int i = 0; i < N_TOP_BLOCKS; i++) {
 		topBlocks[i] = topFactory.create();
 
+		// For each column j inside top-block.
+		for (int j = 0; j < BLOCK_SIDE; j++) {
+			// For each row k inside top-block.
+			for (int k = 0; k < BLOCK_SIDE; k++) {
+				// The latent block that exists there.
+				blocks[i][j][k] = subFactory.create();
+			}
+		}
+	}
+
+	build();
+}
+
+void Glyph::build() {
 	// Re-useable empty block.
 	GlyphBlock emptyBlock;
 
@@ -22,39 +36,23 @@ Glyph::Glyph(const GlyphBlockFactory& topFactory, const GlyphBlockFactory& subFa
 		for (int j = 0; j < BLOCK_SIDE; j++) {
 			// For each row k inside top-block.
 			for (int k = 0; k < BLOCK_SIDE; k++) {
-				GlyphBlock newBlockOnTheBlock;
-				// If top-block contains element: draw something there.
-				if (topBlocks[i].get(j, k)) {
-					float rnd = float(rand()) / RAND_MAX; // pick random number in [0, 1]
-					
-					// Subdivide using a generative block.
-					if (rnd < subdivisionProbability)
-					{
-						newBlockOnTheBlock = subFactory.create();
-					}
 
-					// Do not subdivide: use basic connection block.
-					else {
-						newBlockOnTheBlock = GlyphBlock(
+				// Default block if sub-block is not activated.
+				defaultBlocks[i][j][k] =
+				  (topBlocks[i].get(j, k) ?
+            GlyphBlock(
 							currentTopBlock.getIfExists(j-1, k), // left
 							currentTopBlock.getIfExists(j, k-1, prevTopBlock, nextTopBlock), // top
 							currentTopBlock.getIfExists(j+1, k), // right
-							currentTopBlock.getIfExists(j, k+1, prevTopBlock, nextTopBlock)); // bottom
-						//newBlockOnTheBlock = GlyphBlock(
-						//  currentTopBlock.getIfExists(j, k-1, prevTopBlock, nextTopBlock),
-						//  i == 0 ? prevTopBlock.get(2, k) : currentTopBlock.getIfExists(j-1, k),
-						//  currentTopBlock.getIfExists(j, k+1),
-						//  i == (N_TOP_BLOCKS-1) ? nextTopBlock.get(0, k) : currentTopBlock.getIfExists(j+1, k));
-					}
-				}
-				// Otherwise: empty block.
-				else
-					newBlockOnTheBlock = emptyBlock;
-				blocks[i][j][k] = newBlockOnTheBlock;
+							currentTopBlock.getIfExists(j, k+1, prevTopBlock, nextTopBlock)) // bottom
+							:
+							emptyBlock);
 			}
 		}
 	}
+}
 
+void Glyph::update(float activationThreshold) {
 	// Each top block.
 	for (int top = 0, yOffset = 0; top < N_TOP_BLOCKS; top++) {
 		// Each row.
@@ -62,7 +60,9 @@ Glyph::Glyph(const GlyphBlockFactory& topFactory, const GlyphBlockFactory& subFa
 			// Each column.
 			for (int col = 0, xOffset = 0; col < BLOCK_SIDE; col++, xOffset += BLOCK_SIDE) {
 				// Get current block.
-				GlyphBlock currentBlock = blocks[top][col][row];
+				GlyphBlock& currentBlock = blocks[top][col][row];
+				if (! currentBlock.isActivated(activationThreshold))
+					currentBlock = defaultBlocks[top][col][row];
 				// Copy it into the matrix in the right spot.
 				for (int x = 0; x < BLOCK_SIDE; x++) {
 					for (int y = 0; y < BLOCK_SIDE; y++) {
@@ -71,5 +71,19 @@ Glyph::Glyph(const GlyphBlockFactory& topFactory, const GlyphBlockFactory& subFa
 				}
 			}
 		}
+	}
+}
+
+void Glyph::evolveTopBlock(const GlyphBlockFactory& topFactory, int topBlockIndex, float mutationRate) {
+	if (GlyphBlockFactory::random01() < mutationRate) {
+		topBlocks[topBlockIndex] = topFactory.create();
+		build();
+	}
+}
+
+void Glyph::evolveSubBlock(const GlyphBlockFactory& subFactory, int topBlockIndex, int x, int y, float mutationRate) {
+	if (GlyphBlockFactory::random01() < mutationRate) {
+		blocks[topBlockIndex][x][y] = subFactory.create();
+		build();
 	}
 }
