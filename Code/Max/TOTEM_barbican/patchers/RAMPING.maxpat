@@ -161,9 +161,9 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 117.0, 325.0, 69.0, 22.0 ],
+					"patching_rect" : [ 117.0, 325.0, 75.0, 22.0 ],
 					"style" : "",
-					"text" : "speedlim 1"
+					"text" : "speedlim 30"
 				}
 
 			}
