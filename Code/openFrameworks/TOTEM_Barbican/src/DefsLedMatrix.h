@@ -14,13 +14,18 @@
 
 enum GlyphType {
     TYPE_I,
-    TYPE_L,
+    TYPE_F,
+    TYPE_Z,
     TYPE_T,
+    TYPE_L,
+    TYPE_Y,
+    TYPE_H,
+    TYPE_J,
     TYPE_U,
     TYPE_O,
     TYPE_X,
-    TYPE_VOID,
-    N_TYPES
+    N_TYPES,
+    TYPE_VOID // dummy type
 };
 const int MAX_TYPE = N_TYPES - 1;
 

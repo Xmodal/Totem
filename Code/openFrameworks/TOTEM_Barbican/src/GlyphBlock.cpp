@@ -25,73 +25,114 @@ GlyphBlock::GlyphBlock(bool left, bool top, bool right, bool bottom) {
 	);
 }
 
-Matrix3x3 GlyphBlock::createBase(GlyphType type) const 
+Matrix3x3 GlyphBlock::createBase(GlyphType type) const
 {
 	switch (type)
 	{
-		//L case
-	case TYPE_L:
-		// * . . 
-		// * . .
-		// * * *
-		return Matrix3x3(
-			O, X, X,
-			O, X, X,
-			O, O, O);
-	case TYPE_I:
-		// . * .
-		// . * .
-		// . * .
-		return Matrix3x3(
-			X, O, X,
-			X, O, X,
-			X, O, X);
-	case TYPE_T:
-		// * * *
-		// . * .
-		// . * .
-		return Matrix3x3(
-			O, O, O,
-			X, O, X,
-			X, O, X);
-	case TYPE_U:
-		// * . * 
-		// * . *
-		// * * *
-		return Matrix3x3(
-			O, X, O,
-			O, X, O,
-			O, O, O);
+		// I case
+		case TYPE_I:
+			// . * .
+			// . * .
+			// . * .
+			return Matrix3x3(
+				X, O, X,
+				X, O, X,
+				X, O, X);
+		// F case
+		case TYPE_F:
+			// . * *
+			// . * .
+			// . * .
+			return Matrix3x3(
+				X, O, O,
+				X, O, X,
+				X, O, X);
+		// Z case
+		case TYPE_Z:
+			// * * .
+			// . * .
+			// . * *
+			return Matrix3x3(
+				O, O, X,
+				X, O, X,
+				X, O, O);
+		// T case
+		case TYPE_T:
+			// . * .
+			// . * .
+			// * * *
+			return Matrix3x3(
+				X, O, X,
+				X, O, X,
+				O, O, O);
+		// L case
+		case TYPE_L:
+			// * . .
+			// * . .
+			// * * *
+			return Matrix3x3(
+				O, X, X,
+				O, X, X,
+				O, O, O);
+		// Y case
+		case TYPE_Y:
+			// * . *
+			// * * *
+			// . * .
+			return Matrix3x3(
+				O, X, O,
+				O, O, O,
+				X, O, X);
+		// H case
+		case TYPE_H:
+			// * . *
+			// * * *
+			// * . *
+			return Matrix3x3(
+				O, X, O,
+				O, O, O,
+				O, X, O);
+		// J case
+		case TYPE_J:
+			// . . *
+			// * . *
+			// * * *
+			return Matrix3x3(
+				X, X, O,
+				O, X, O,
+				O, O, O);
+		// U case
+		case TYPE_U:
+			// * . *
+			// * . *
+			// * * *
+			return Matrix3x3(
+				O, X, O,
+				O, X, O,
+				O, O, O);
+		// O case
+		case TYPE_O:
+			// * * *
+			// * . *
+			// * * *
+			return Matrix3x3(
+				O, O, O,
+				O, X, O,
+				O, O, O);
+		// X case
+		case TYPE_X:
+			// * * *
+			// * * *
+			// * * *
+			return Matrix3x3(
+				O, O, O,
+			  O, O, O,
+			  O, O, O);
 
-	case TYPE_O:
-		// * * *
-		// * . *
-		// * * *
-		return Matrix3x3(
-			O, O, O,
-			O, X, O,
-			O, O, O);
-            
-    case TYPE_X:
-        // * * *
-        // * . *
-        // * * *
-        return Matrix3x3(
-             X, X, X,
-             X, X, X,
-             X, X, X);
-
-	case TYPE_VOID:
-		//. . .
-		//. . . 
-		//. . .
-		return Matrix3x3(
-			O, O, O,
-			O, O, O,
-			O, O, O);
-
-	default:
-		return Matrix3x3(X, X, X, X, X, X, X, X, X);
+    // VOID (default)
+		case TYPE_VOID:
+		default:
+			return Matrix3x3(X, X, X, X, X, X, X, X, X);
 	}
 
 }Matrix3x3 GlyphBlock::translate(const Matrix3x3& m, GlyphTranslation translation) const
