@@ -9,18 +9,36 @@ void ofApp::setup() {
     
     sender.setup(hostIP, PORT);
     
-    //camera.setup(640, 480);
+    cameraA.listDevices();
+    cameraB.listDevices();
     
-    video.load("movies/jackson_hole_30.mp4");
-    video.play();
+    cameraA.setDeviceID(0);
+    cameraB.setDeviceID(1);
+    
+    cameraA.setup(640, 480);
+    
+    uvcControlA.useCamera(vendorId, productId, interfaceNum);
+    uvcControlA.setAutoExposure(false);
+    uvcControlA.setExposure(0.9);
+    uvcControlA.setAutoWhiteBalance(false);
+    controls = uvcControlA.getCameraControls();
+    
+    cameraB.setup(640, 480);
+
+    uvcControlB.useCamera(vendorId, productId, interfaceNum);
+    uvcControlB.setAutoExposure(false);
+    uvcControlB.setExposure(0.9);
+    uvcControlB.setAutoWhiteBalance(false);
+    controls = uvcControlB.getCameraControls();
     
     gui.setup();
     
-    /*gui.add(lkMaxLevel.set("lkMaxLevel", 3, 0, 8));
-    gui.add(lkMaxFeatures.set("lkMaxFeatures", 200, 1, 1000));
-    gui.add(lkQualityLevel.set("lkQualityLevel", 0.01, 0.001, .02));
-    gui.add(lkMinDistance.set("lkMinDistance", 4, 1, 16));
-    gui.add(lkWinSize.set("lkWinSize", 8, 4, 64));*/
+    gui.add(resetBackground.set("Reset Background", false));
+    gui.add(learningTime.set("Learning Time", (frameRate*10), 0, (frameRate*60)));
+    gui.add(thresholdValue.set("Threshold Value", 25, 0, 255));
+    
+    gui.add(drawThreshold.set("draw threshold", false));
+    gui.add(drawFlow.set("draw flow", true));
     
     gui.add(usefb.set("Use Farneback", true));
     gui.add(fbPyrScale.set("fbPyrScale", .5, 0, .99));
@@ -31,100 +49,135 @@ void ofApp::setup() {
     gui.add(fbUseGaussian.set("fbUseGaussian", false));
     gui.add(fbWinSize.set("winSize", 9, 4, 64));
     
-    gui.add(resetBackground.set("Reset Background", false));
-    gui.add(learningTime.set("Learning Time", (frameRate*30), 0, (frameRate*60)));
-    gui.add(thresholdValue.set("Threshold Value", 25, 0, 255));
-    curFlow = &fb;
-    
+    curFlowA = &fbA;
+    curFlowB = &fbB;
 }
 
 void ofApp::update(){
     
-    //camera.update();
-    video.update();
-    tempResize = video.getPixels();
-    //tempResize = camera.getPixels();
-    tempResize.resize(640/derezFactor, 480/derezFactor);
+    controls = uvcControlA.getCameraControls();
+    
+    cameraA.update();
+    cameraB.update();
+
+    tempResizeA = cameraA.getPixels();
+    tempResizeA.resize(640/derezFactor, 480/derezFactor);
+    tempResizeA.rotate90(2);
+    
+    tempResizeB = cameraB.getPixels();
+    tempResizeB.resize(640/derezFactor, 480/derezFactor);
+    tempResizeB.rotate90(2);
     
     if(resetBackground) {
-        background.reset();
+        backgroundA.reset();
+        backgroundB.reset();
         resetBackground = false;
     }
     
-    //if(camera.isFrameNew()) {
-    if(video.isFrameNew()) {
+    if(cameraA.isFrameNew()) {
         
-        background.setLearningTime(learningTime);
-        background.setThresholdValue(thresholdValue);
-        //background.setIgnoreForeground(false); //setIgnoreForeground(bool ignoreForeground)
+        backgroundA.setLearningTime(learningTime);
+        backgroundA.setThresholdValue(thresholdValue);
         
-        //background.update(camera, thresholded);
-        //background.update(video, thresholded);
+        backgroundB.setLearningTime(learningTime);
+        backgroundB.setThresholdValue(thresholdValue);
         
-        background.update(tempResize, thresholded);
-        thresholded.update();
+        backgroundA.update(tempResizeA, thresholdedA);
+        backgroundB.update(tempResizeB, thresholdedB);
         
-        if(usefb) {
-            curFlow = &fb;
-            fb.setPyramidScale(fbPyrScale);
-            fb.setNumLevels(fbLevels);
-            fb.setWindowSize(fbWinSize);
-            fb.setNumIterations(fbIterations);
-            fb.setPolyN(fbPolyN);
-            fb.setPolySigma(fbPolySigma);
-            fb.setUseGaussian(fbUseGaussian);
-        } else {
-            curFlow = &lk;
-            lk.setMaxFeatures(lkMaxFeatures);
-            lk.setQualityLevel(lkQualityLevel);
-            lk.setMinDistance(lkMinDistance);
-            lk.setWindowSize(lkWinSize);
-            lk.setMaxLevel(lkMaxLevel);
+        thresholdedA.update();
+        thresholdedB.update();
+        
+            if(usefb) {
+                curFlowA = &fbA;
+                fbA.setPyramidScale(fbPyrScale);
+                fbA.setNumLevels(fbLevels);
+                fbA.setWindowSize(fbWinSize);
+                fbA.setNumIterations(fbIterations);
+                fbA.setPolyN(fbPolyN);
+                fbA.setPolySigma(fbPolySigma);
+                fbA.setUseGaussian(fbUseGaussian);
+                
+                curFlowB = &fbB;
+                fbB.setPyramidScale(fbPyrScale);
+                fbB.setNumLevels(fbLevels);
+                fbB.setWindowSize(fbWinSize);
+                fbB.setNumIterations(fbIterations);
+                fbB.setPolyN(fbPolyN);
+                fbB.setPolySigma(fbPolySigma);
+                fbB.setUseGaussian(fbUseGaussian);
+            }
+        
+        curFlowA->calcOpticalFlow(tempResizeA);
+        curFlowB->calcOpticalFlow(tempResizeB);
+        
+        //runningTotalVectorBufferA[bufferCounter] = getQuantityOfFlow2(fbA);
+        runningTotalAmountFlowA[bufferCounter] = getQuantityOfFlow2(fbA);
+        runningAverageVectorBufferA[bufferCounter] = fbA.getAverageFlow();
+    
+        //runningTotalVectorBufferB[bufferCounter] = getQuantityOfFlow2(fbB);
+        runningTotalAmountFlowB[bufferCounter] = getQuantityOfFlow2(fbB);
+        runningAverageVectorBufferB[bufferCounter] = fbB.getAverageFlow();
+    
+        averageFlowPerSecond = (getFlowPerSecond(runningAverageVectorBufferA) - getFlowPerSecond(runningAverageVectorBufferB))/2;
+        
+        if(averageFlowPerSecond.y > 1.0){
+            curFlowA->resetFlow();
+            curFlowB->resetFlow();
         }
         
-        //curFlow->calcOpticalFlow(camera);
-        //curFlow->calcOpticalFlow(video);
-        curFlow->calcOpticalFlow(tempResize);
+        averageFlowPerTenSeconds = getAverageOverTime(frameRate*10);
+        totalFlowPerSecond = (getFlowPerSecond(runningTotalVectorBufferA) - getFlowPerSecond(runningTotalVectorBufferB))/2;
+        amountFlowPerSecond = (getPresencePerSecond(runningTotalAmountFlowA) + getPresencePerSecond(runningTotalAmountFlowB))/2;
+        presencePerSecond = (getPresencePerSecond(runningAveragePresenceBufferA) + getPresencePerSecond(runningAveragePresenceBufferA))/2;
+    
+        runningAveragePresenceBufferA[bufferCounter] = cv::mean(backgroundA.getForeground())[0] * 0.8;
+        runningAveragePresenceBufferB[bufferCounter] = cv::mean(backgroundB.getForeground())[0] * 0.8;
         
-        fb.getTotalFlow();
+        presencePerSecond = (getPresencePerSecond(runningAveragePresenceBufferA) + getPresencePerSecond(runningAveragePresenceBufferB))/2;
         
-        runningTotalVectorBuffer[bufferCounter] = getQuantityOfFlow(fb);
-        runningAverageVectorBuffer[bufferCounter] = fb.getAverageFlow();
-        
-        averageFlowPerSecond = getFlowPerSecond(runningAverageVectorBuffer);
-        totalFlowPerSecond = getFlowPerSecond(runningTotalVectorBuffer);
-        amountFlowPerSecond = glm::length(totalFlowPerSecond);
-        
-        presence = cv::mean(background.getForeground())[0]/100;
+        presenceTenSeconds = getAveragePresenceOverTime(10);
+        presenceThirtySeconds = getAveragePresenceOverTime(30);
+        presenceMinute = getAveragePresenceOverTime(60);
+        presenceFiveMinutes = getAveragePresenceOverTime(60 * 5);
+        presenceThirtyMinutes = getAveragePresenceOverTime(60 * 30);
+        presenceThreeHours = getAveragePresenceOverTime(60 * 180);
+        presenceMinuteStanDev = getPresenceStanDev(longAveragePresenceBuffer, 60);
+        //presenceThreeHoursStanDev = getPresenceStanDev(longAveragePresenceBuffer, 60);
         
         bufferCounter++;
         
         if(bufferCounter == frameRate - 1){
-            
             bufferCounter = 0;
             longAverageFlowBuffer[secondCounter] = averageFlowPerSecond;
-            longTotalFlowBuffer[secondCounter] = totalFlowPerSecond;
+            //longTotalFlowBuffer[secondCounter] = totalFlowPerSecond;
+            longAveragePresenceBuffer[secondCounter] = presencePerSecond;
             secondCounter++;
+            sendMessages();
+        }
+        
+        if(secondCounter >= longBufferSize - 1){
+            secondCounter = 0;
+            hasBufferFilled = true;
+        }
+        
+        s << "Camera name: " << cameraName << "\nAuto-exposure: " << uvcControlA.getAutoExposure() << "\nexposure: " << uvcControlA.getExposure() << "\nAuto-focus: " << uvcControlA.getAutoFocus() <<
+        "\nAbsolute focus: " << uvcControlA.getAbsoluteFocus() <<
+        "\nPress 'e' to toggle auto-exposure.\nPress 'f' to toggle auto-focus.\nPress +/- to set absolute foucs.\n\nResult of GET_STATUS for each feature\non this camera:\n";
+        
+        for(int i = 0; i < 4; i++){
+            
+            s << controls.at(i).name << ": " << controls.at(i).status << "\n";
             
         }
         
-        if(secondCounter >= 2000 - 1){
-            secondCounter = 0;
+        if(bufferCounter == 5 && !fiveSecIn){
+            backgroundA.reset();
+            backgroundB.reset();
+            fiveSecIn = true;
         }
         
-        flowSecA.clear();
-        flowSecA.setAddress("/A/CV/flow/0");
-        flowSecA.addFloatArg(averageFlowPerSecond.x);
-        flowSecA.addFloatArg(averageFlowPerSecond.y);
-        flowSecA.addFloatArg(amountFlowPerSecond);
-        sender.sendMessage(flowSecA);
-        
-        presenceA.clear();
-        presenceA.setAddress("/A/CV/flow/0");
-        presenceA.addFloatArg(averageFlowPerSecond.x);
-        presenceA.addFloatArg(averageFlowPerSecond.y);
-        presenceA.addFloatArg(amountFlowPerSecond);
-        sender.sendMessage(presenceA);
+        sendMessages();
         
     }
     
@@ -132,36 +185,139 @@ void ofApp::update(){
 
 void ofApp::draw(){
     
-    if(thresholded.isAllocated()) {
-        thresholded.draw(640, 480);
-    }
-    
     ofPushMatrix();
     
-    ofTranslate(640, 0);
-    //camera.draw(0,0,640,480);
-    //video.draw(0,0,640,480);
+    tempResizeA.draw(0,350,640/2,480/2);
+    tempResizeB.draw(0,590,640/2,480/2);
     
-    tempResize.draw(0,0,640,480);
-    curFlow->draw(0,0,640,480);
+    if(drawThreshold){
+        if(thresholdedA.isAllocated()) {
+            thresholdedA.resize(640/2, 480/2);
+            thresholdedA.draw(0,350);
+        }if(thresholdedB.isAllocated()) {
+            thresholdedB.resize(640/2, 480/2);
+            thresholdedB.draw(0,590);
+        }
+    }
     
-    ofDrawBitmapStringHighlight(ofToString((int) ofGetFrameRate()) + " fps", -300, 20);
+    if(drawFlow){
+        curFlowA->draw(0,350,640/2,480/2);
+        curFlowB->draw(0,590,640/2,480/2);
+    }
     
-    ofDrawBitmapStringHighlight(ofToString(secondCounter) + " second counter", -300, 40);
+    ofDrawBitmapStringHighlight("camA", 10, 370);
+    ofDrawBitmapStringHighlight("camB", 10,590);
     
-    ofDrawBitmapStringHighlight(ofToString(averageFlowPerSecond.x) + " per second X", -300, 60);
-    ofDrawBitmapStringHighlight(ofToString(averageFlowPerSecond.y) + " per second Y", -300, 80);
-    ofDrawBitmapStringHighlight(ofToString(getAverageOverTime(10).y) + " per ten seconds Y", -300, 100);
-    ofDrawBitmapStringHighlight(ofToString(getAverageOverTime(60).y) + " per minute Y", -300, 120);
-    ofDrawBitmapStringHighlight(ofToString(getAverageOverTime(60*10).y) + " per ten minutes Y", -300, 140);
+    ofDrawBitmapStringHighlight(ofToString(presencePerSecond) + "% presence Second", 320, 20);
+    ofDrawBitmapStringHighlight(ofToString(presenceTenSeconds) + "% presence 10 Seconds", 320, 40);
+    ofDrawBitmapStringHighlight(ofToString(presenceThirtySeconds) + "% presence 30 Seconds", 320, 60);
+    ofDrawBitmapStringHighlight(ofToString(presenceMinute) + "% presence 1 Minute", 320, 80);
+    ofDrawBitmapStringHighlight(ofToString(presenceFiveMinutes) + "% presence 5 Minutes", 320, 100);
+    ofDrawBitmapStringHighlight(ofToString(presenceThirtyMinutes) + "% presence 30 Minutes", 320, 120);
+    ofDrawBitmapStringHighlight(ofToString(presenceThreeHours) + "% presence 3 hours", 320, 140);
+    ofDrawBitmapStringHighlight(ofToString(presencePerSecond - presenceMinute) + "% presence change (1 minute window)", 320, 160);
+    ofDrawBitmapStringHighlight(ofToString(presenceTenSeconds - presenceFiveMinutes) + "% presence change (5 minute window)", 320, 180);
+    ofDrawBitmapStringHighlight(ofToString(presenceThirtyMinutes - presenceThreeHours) + "% presence change (3 hour window)", 320, 200);
+    ofDrawBitmapStringHighlight(ofToString(presenceMinuteStanDev) + " stanDev (1 minute)", 320, 220);
     
-    ofDrawBitmapStringHighlight(ofToString(amountFlowPerSecond) + " per second flow total", -300, 180);
-    ofDrawBitmapStringHighlight(ofToString(averageFlowPerSecond) + " per second flow average", -300, 200);
-    ofDrawBitmapStringHighlight(ofToString(presence) + " presence", -300, 220);
-    ofDrawBitmapStringHighlight(ofToString(presence / amountFlowPerSecond) + " devotion (presence / perSecondSpeed)", -300, 240);
+    ofDrawBitmapStringHighlight(ofToString(averageFlowPerSecond.x) + " per second X", 320, 260);
+    ofDrawBitmapStringHighlight(ofToString(averageFlowPerSecond.y) + " per second Y", 320, 280);
+    //ofDrawBitmapStringHighlight(ofToString(totalFlowPerSecond) + " total flow per second", 320, 300);
+    ofDrawBitmapStringHighlight(ofToString(amountFlowPerSecond) + " abs(total flow per second)", 320, 300);
+    
+    ofDrawBitmapStringHighlight(ofToString((int) ofGetFrameRate()) + " fps", 320, 400);
+    ofDrawBitmapStringHighlight(ofToString(secondCounter) + " second counter", 320, 420);
+    ofDrawBitmapStringHighlight(ofToString(longBufferSize - secondCounter) + " time until full buffer", 320, 440);
+
+    //ofDrawBitmapStringHighlight(ofToString(averageFlowPerTenSeconds.y) + " per ten seconds Y", 320, 240);
+    //ofDrawBitmapStringHighlight(ofToString(averageFlowPerMinute.y) + " per minute Y", 320, 260);
+    //ofDrawBitmapStringHighlight(ofToString(averageFlowPerMinute.y) + " per ten minutes Y", 320, 280);
+    
+    ofDrawBitmapString(uvcControlA.getAutoExposure(), 320, 500);
+    ofDrawBitmapString(uvcControlA.getExposure(), 320, 520);
     
     ofPopMatrix();
     gui.draw();
+    
+    ofSetBackgroundColor(presencePerSecond*2.55, presencePerSecond*2.55, presencePerSecond*2.55);
+}
+
+float ofApp::getPresenceStanDev(float buffer[], int seconds){
+    
+    int output = 0;
+
+    if((secondCounter - seconds) < 0){
+        
+        for(int i = 0; i < secondCounter; i++){
+            output += pow(buffer[i] - presenceMinute, 2);
+        }
+        
+        for(int i = longBufferSize - (seconds - secondCounter); i < longBufferSize; i++){
+            output += pow(buffer[i] - presenceMinute, 2);
+        }
+        
+        sumFloat /= seconds;
+        
+        return sqrt(output/seconds);
+        
+    }else{
+        
+        for(int i = (secondCounter - seconds); i < secondCounter; i++){
+            output += pow(buffer[i] - presenceMinute, 2);
+        }
+        
+        return sqrt(output/seconds);
+        
+    }
+    
+}
+
+float ofApp::getPresencePerSecond(float buffer[]){
+    
+    presenceTotal = 0;
+    
+    for(int i = 0; i < frameRate; i++){
+        presenceTotal += buffer[i];
+    }
+   
+    return presenceTotal/frameRate;
+    
+}
+
+float ofApp::getAveragePresenceOverTime(int seconds){
+    
+    sumFloat = 0;
+    
+    if(seconds > longBufferSize - 1){
+        return sumFloat;
+    }
+    
+    if((secondCounter - seconds) < 0){
+        
+        for(int i = 0; i < secondCounter; i++){
+            sumFloat += longAveragePresenceBuffer[i];
+        }
+        
+        for(int i = longBufferSize - (seconds - secondCounter); i < longBufferSize; i++){
+            sumFloat += longAveragePresenceBuffer[i];
+        }
+        
+        sumFloat /= seconds;
+        
+        return sumFloat/seconds;
+        
+    }else{
+        
+        for(int i = (secondCounter - seconds); i < secondCounter; i++){
+            sumFloat += longAveragePresenceBuffer[i];
+        }
+        
+        sumVector.x /= seconds;
+        sumVector.y /= seconds;
+        
+        return sumFloat/seconds;
+        
+    }
     
 }
 
@@ -169,11 +325,11 @@ glm::vec2 ofApp::getFlowPerSecond(glm::vec2 buffer[]){
     
     perSecondVectorTotal.x = 0;
     perSecondVectorTotal.y = 0;
-    amountFlowPerSecond = 0;
+    //amountFlowPerSecond = 0;
     
     for(int i = 0; i < frameRate; i++){
         perSecondVectorTotal += buffer[i];
-        amountFlowPerSecond += glm::length(buffer[i]);
+        //amountFlowPerSecond += glm::length(buffer[i]);
     }
     
     perSecondVectorTotal.x /= frameRate;
@@ -188,13 +344,38 @@ glm::vec2 ofApp::getQuantityOfFlow(ofxCv::FlowFarneback flow){
     quantityVector.x = 0;
     quantityVector.y = 0;
     
-    for(int i = 0; i < (480 / derezFactor) / 8; i++){
-        for(int j = 0; j < (640 / derezFactor) / 8; j++){
-            quantityVector = abs(flow.getTotalFlowInRegion(ofRectangle(i, j, 8, 8)));
+    flowAmount = 0;
+    
+    for(int i = 0; i < (480 / derezFactor) / 8; i+=8){
+        for(int j = 0; j < (640 / derezFactor) / 8; j+=8){
+            quantityVector += abs(flow.getTotalFlowInRegion(ofRectangle(i, j, 8, 8)));
+            if(abs(flow.getTotalFlowInRegion(ofRectangle(i, j, 8, 8))).x > 0.5){
+                flowAmount++;
+            }
         }
     }
     
-    return quantityVector/4;
+    //cout << flowAmount << endl;
+    
+    return quantityVector/3000;
+    
+}
+
+float ofApp::getQuantityOfFlow2(ofxCv::FlowFarneback flow){
+    
+    float sum = 0;
+    int numberOfTiles = (flow.getWidth() * flow.getHeight()) / (flowQuantityTileSize*flowQuantityTileSize);
+    
+    for(int i = 0; i < flow.getWidth(); i+=flowQuantityTileSize) {
+        for(int j = 0; j < flow.getHeight(); j+=flowQuantityTileSize) {
+            sum += glm::length(flow.getTotalFlowInRegion(ofRectangle(i, j, flowQuantityTileSize, flowQuantityTileSize)));
+        }
+    }
+    
+    //cout << quantityVector/300 << endl;
+    //cout << "test: " << flow.getTotalFlowInRegion(ofRectangle((440/derezFactor), 20, 8, 8)) << endl;
+    
+    return sum/numberOfTiles;
     
 }
 
@@ -235,4 +416,128 @@ glm::vec2 ofApp::getAverageOverTime(int seconds){
         
     }
     
+}
+
+void ofApp::sendMessages(){
+    
+    //////////////////PRESENCE//////////////////
+    
+    /////////1 SECOND/////////
+    presenceSec.clear();
+    presenceSec.setAddress("/CV/presence/0");
+    presenceSec.addFloatArg(presencePerSecond);
+    sender.sendMessage(presenceSec);
+    
+    /////////10 SECONDS/////////
+    presenceTenSec.clear();
+    presenceTenSec.setAddress("/CV/presence/10");
+    presenceTenSec.addFloatArg(presenceTenSeconds);
+    sender.sendMessage(presenceTenSec);
+    
+    /////////30 SECONDS/////////
+    presenceThirtySec.clear();
+    presenceThirtySec.setAddress("/CV/presence/30");
+    presenceThirtySec.addFloatArg(presenceThirtySeconds);
+    sender.sendMessage(presenceThirtySec);
+   
+    /////////1 MINUTE/////////
+    presenceMin.clear();
+    presenceMin.setAddress("/CV/presence/60");
+    presenceMin.addFloatArg(presenceMinute);
+    sender.sendMessage(presenceMin);
+    
+    /////////1 MINUTE STANDEV/////////
+    presenceMinStanDev.clear();
+    presenceMinStanDev.setAddress("/CV/presenceStanDev/60");
+    presenceMinStanDev.addFloatArg(presenceMinuteStanDev);
+    sender.sendMessage(presenceMinStanDev);
+    
+    /////////5 MINUTES/////////
+    presenceFiveMin.clear();
+    presenceFiveMin.setAddress("/CV/presence/300");
+    presenceFiveMin.addFloatArg(presenceFiveMinutes);
+    sender.sendMessage(presenceFiveMin);
+    
+    /////////30 MINUTES/////////
+    presenceThirtyMin.clear();
+    presenceThirtyMin.setAddress("/CV/presence/1800");
+    presenceThirtyMin.addFloatArg(presenceThirtyMinutes);
+    sender.sendMessage(presenceThirtyMin);
+    
+    /////////3 HOURS/////////
+    presenceThreeHour.clear();
+    presenceThreeHour.setAddress("/CV/presence/10800");
+    presenceThreeHour.addFloatArg(presenceThreeHours);
+    sender.sendMessage(presenceThreeHour);
+    
+    
+    //////////////////FLOW//////////////////
+    
+    /////////1 SECOND/////////
+    flowSec.clear();
+    flowSec.setAddress("/CV/flow/0");
+    flowSec.addFloatArg(averageFlowPerSecond.y);
+    sender.sendMessage(flowSec);
+    
+    
+    /////////1 SECOND/////////
+    movement.clear();
+    movement.setAddress("/CV/movement/0");
+    movement.addFloatArg(amountFlowPerSecond);
+    sender.sendMessage(movement);
+     
+     /*/////////10 SECONDS/////////
+     flowTenSec.clear();
+     flowTenSec.setAddress("/CV/flow/10");
+     flowTenSec.addFloatArg(averageFlowPerTenSeconds.x * 255);
+     flowTenSec.addFloatArg(averageFlowPerTenSeconds.y * 255);
+     flowTenSec.addFloatArg(amountFlowPerSecond * 255);
+     sender.sendMessage(flowTenSec);
+     
+     /////////30 SECONDS/////////
+     flowThirtySec.clear();
+     flowThirtySec.setAddress("/CV/flow/30");
+     flowThirtySec.addFloatArg(averageFlowPerThirtySeconds.x * 255);
+     flowThirtySec.addFloatArg(averageFlowPerThirtySeconds.y * 255);
+     flowThirtySec.addFloatArg(amountFlowPerSecond * 255);
+     sender.sendMessage(flowThirtySec);
+     
+     /////////1 MINUTE/////////
+     flowMin.clear();
+     flowMin.setAddress("/CV/flow/60");
+     flowMin.addFloatArg(averageFlowPerMinute.x * 255);
+     flowMin.addFloatArg(averageFlowPerMinute.y * 255);
+     flowMin.addFloatArg(amountFlowPerSecond * 255);
+     sender.sendMessage(flowMin);
+    
+    
+    //////////////////DEVOTION//////////////////
+    
+    /////////1 SECOND/////////
+    devotionSec.clear();
+    devotionSec.setAddress("/CV/devotion/0");
+    devotionSec.addFloatArg(presencePerSecond / (amountFlowPerSecond * 255));
+    sender.sendMessage(devotionSec);*/
+    
+}
+
+void ofApp::keyPressed(int key){
+    if(key == 'e'){
+        uvcControlA.setAutoExposure(!uvcControlA.getAutoExposure());
+    }
+    
+    if(key == 'f'){
+        uvcControlA.setAutoFocus(!uvcControlA.getAutoFocus());
+    }
+    
+    if(key == '='){
+        focus += 0.1;
+        uvcControlA.setAbsoluteFocus(focus);
+    }
+    
+    if(key == '-'){
+        focus -= 0.1;
+        uvcControlA.setAbsoluteFocus(focus);
+        
+    }
 }

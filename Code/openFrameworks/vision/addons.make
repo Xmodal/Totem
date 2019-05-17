@@ -4,3 +4,5 @@ ofxOpenCv
 ofxOsc
 ofxPlotter
 ofxPubSubOsc
+ofxUVC
+ofxYAML
