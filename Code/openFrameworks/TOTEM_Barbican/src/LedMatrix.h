@@ -10,6 +10,7 @@ class LedMatrix {
 
 public:
 	LedMatrix(int baudRate, const std::string& serialPort, bool display);
+	LedMatrix(int baudRate, const std::string& serialPortPrefix, int serialPortIndex, bool display);
 
 	void init(int baudRate, const std::string& serialPort, bool display);
 

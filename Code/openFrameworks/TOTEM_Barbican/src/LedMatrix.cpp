@@ -5,9 +5,26 @@ LedMatrix::LedMatrix(int baudRate_, const std::string& serialPort_, bool display
 	init(baudRate_, serialPort_, display_);
 }
 
-LedMatrix::LedMatrix(int baudRate_, const std::string& serialPort_, bool toDisplay) : baudRate(baudRate_), serialPort(serialPort_)
+LedMatrix::LedMatrix(int baudRate_, const std::string& serialPortPrefix_, int serialPortIndex_, bool display_)
 {
-	display = toDisplay;
+	int currentIndex = 0;
+	std::string foundSerialPort;
+	vector<ofSerialDeviceInfo> devices = serial.getDeviceList();
+	for (vector<ofSerialDeviceInfo>::iterator it = devices.begin(); it != devices.end(); ++it) {
+		// Check if match prefix.
+		if (it->getDevicePath().rfind(serialPortPrefix_, 0) == 0) {
+			if (currentIndex == serialPortIndex_) {
+				foundSerialPort = it->getDevicePath();
+				break;
+			}
+			else
+				currentIndex++;
+		}
+	}
+
+	// Initialize with the found serial port.
+	init(baudRate_, foundSerialPort, display_);
+}
 
 void LedMatrix::init(int baudRate_, const std::string& serialPort_, bool display_) {
 	baudRate = baudRate_;
@@ -44,12 +61,11 @@ void LedMatrix::setup()
 	flush();
 }
 
+
 void LedMatrix::set(int x, int y, unsigned char value)
 {
 	if (value > 254)
 		value = 254;
-    if (value < 0)
-        value = 0;
 	LedMatrix2D[x][y] = value;
 }
 
@@ -127,5 +143,6 @@ int LedMatrix::check() {
             }
         }
     }
+		// Not sure it this is appropriate.
+		return 0;
 }
-
