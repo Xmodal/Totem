@@ -1,17 +1,23 @@
 #include "LedMatrix.h"
 
+LedMatrix::LedMatrix(int baudRate_, const std::string& serialPort_, bool display_)
+{
+	init(baudRate_, serialPort_, display_);
+}
 
 LedMatrix::LedMatrix(int baudRate_, const std::string& serialPort_, bool toDisplay) : baudRate(baudRate_), serialPort(serialPort_)
 {
 	display = toDisplay;
+
+void LedMatrix::init(int baudRate_, const std::string& serialPort_, bool display_) {
+	baudRate = baudRate_;
+	display = display_;
+	serialPort = serialPort_;
+
 	if (display)
-	{
 		std::cout << "Sending display & serial" << std::endl;
-	}
 	else
 		std::cout << "Sending serial only" << std::endl;
-	//serial.listDevices();
-	//vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
 }
 
 void LedMatrix::drawOnDisplay(int s_size, int s_spacing, int s_xOffset, int s_yOffset) {
@@ -30,8 +36,8 @@ void LedMatrix::drawOnDisplay(int s_size, int s_spacing, int s_xOffset, int s_yO
 
 void LedMatrix::setup()
 {
-	serial.listDevices();
-	vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
+	// serial.listDevices();
+	// vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
 	serial.setup(serialPort, baudRate);
 	//setup the led with nothing on it
 	clear();

@@ -11,6 +11,8 @@ class LedMatrix {
 public:
 	LedMatrix(int baudRate, const std::string& serialPort, bool display);
 
+	void init(int baudRate, const std::string& serialPort, bool display);
+
 	void setup();
 	void set(int x, int y, unsigned char value);
     void set(int x, int y, unsigned char value, float mix);
@@ -36,7 +38,7 @@ private:
 	unsigned char led_string[LED_MATRIX_N_LEDS + 1];
 	ofSerial serial;
     int timeSinceLastOutput;
-    
+
 };
 
 #endif
